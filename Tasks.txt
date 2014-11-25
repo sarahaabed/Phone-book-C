@@ -1,0 +1,23 @@
+File Menu   ==> New, Open, Save, Exit
+
+
+New   --> Add New File
+Open  --> Phone book
+Save  --> Sure?
+
+View Menu   ==> Sort by name, Sort by phone, Sort by address
+
+All --> Phone book
+
+Search Menu ==>  Phone, Name
+
+Phone --> Enter a phone
+Name  --> Enter a name
+
+Result --> Search result
+
+
+Taher --> (file, new)
+Heba --> (Search, Search result)
+Hala  --> (view, phone book)
+sara --> (open, sure?? , edit record)

@@ -39,6 +39,17 @@ int main(void)
 		key=getch();
 	header(key);
 
+//Taher
+
+//Hala
+
+//Heba
+
+//Sara
+
+
+
+
 	getch();
 	return 0;
 }
@@ -60,7 +71,7 @@ void header(char key)
 				case alt_v:
 					printf("keda v");
 					break;
-			}
+	}
 
 
 		//hanlde right and left arrows in future
@@ -75,3 +86,12 @@ void footer(void)
 	cprintf("  Alt+f File    Alt+V  View     Alt+s  Search                                  ");
 	textattr(normal);
 }
+
+
+//Taher
+
+//Hala
+
+//Heba
+
+//Sara

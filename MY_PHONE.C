@@ -37,8 +37,9 @@ int main(void)
 	key=getch();
 	if (key == NULL)
 		key=getch();
-	header(key);
+	
 
+	header(key);
 //Taher
 
 //Hala
@@ -58,12 +59,31 @@ int main(void)
 void header(char key)
 {
 
+	char file_menu[4]][10]={"open      " , "new       " , "save      " , "exit      "};
 	// Handle Alt+f, Alt+v, Alt+s
 	gotoxy(12,12);
 	switch(key)
 	{
 			case alt_f:
 					printf("kede f");
+					window(10,10,40,11);
+					textcolor(BLACK);
+					textbackground(WHITE);
+					gotoxy(10,12);
+					//textcolor(WHITE);
+					//textattr(highlight);
+					cprintf("%s"file_menu[0]);
+					gotoxy(2,1);
+					textattr(highlight);
+					cprintf("%s"file_menu[1]);
+					gotoxy(3,1);
+					textattr(highlight);
+					cprintf("%s"file_menu[2]);
+					gotoxy(4,1);
+					textattr(highlight);
+					cprintf("%s"file_menu[3]);
+					getch();
+					
 					break;
 				case alt_s:
 					printf("keda s");

@@ -3,7 +3,7 @@
 
 #define esc 		27
 #define enter 		13
-#define up 		72
+#define up 			72
 #define down 		80
 #define home 		71
 #define end 		79
@@ -18,8 +18,11 @@
 #define f2    		60
 #define right 		77
 #define left 		75
+
+
 void header(char);
 void footer(void);
+void menu_file(void);
 void menu_view(void);
 
 int main(void)
@@ -30,7 +33,7 @@ int main(void)
 	textattr(normal);
 	clrscr();
 	footer();
-	flushall();
+
 	gotoxy(1,1);
 	textattr(highlight);
 	for(i=0; i<3; i++)
@@ -39,8 +42,8 @@ int main(void)
 	key=getch();
 	if (key == NULL)
 		key=getch();
-	
 
+	
 	header(key);
 //Taher
 
@@ -53,52 +56,32 @@ int main(void)
 
 
 
-	getch();
+//	getch();
 	return 0;
 }
 
 
 void header(char key)
 {
-
-	char file_menu[4]][10]={"open      " , "new       " , "save      " , "exit      "};
 	// Handle Alt+f, Alt+v, Alt+s
-	gotoxy(12,12);
+
+	
 	switch(key)
 	{
 			case alt_f:
-					printf("kede f");
-					window(10,10,40,11);
-					textcolor(BLACK);
-					textbackground(WHITE);
-					gotoxy(10,12);
-					//textcolor(WHITE);
-					//textattr(highlight);
-					cprintf("%s"file_menu[0]);
-					gotoxy(2,1);
-					textattr(highlight);
-					cprintf("%s"file_menu[1]);
-					gotoxy(3,1);
-					textattr(highlight);
-					cprintf("%s"file_menu[2]);
-					gotoxy(4,1);
-					textattr(highlight);
-					cprintf("%s"file_menu[3]);
-					getch();
-					
+					menu_file();
 					break;
+				
 				case alt_s:
 					printf("keda s");
 					break;
 				case alt_v:
-					//printf("keda v");
 					menu_view();
 					break;
+						
 	}
 
-
-		//hanlde right and left arrows in future
-
+		
 
 }
 
@@ -113,7 +96,127 @@ void footer(void)
 
 //Taher
 
+void menu_file(void)
+{
+	char key;
+	char new_file_name[15];
+	int terminate=0;
+	int j = 0 ;
+	int i = 0;
+	int pos=0;					///	to handle the current position of the cursor.
+	char file_menu[4][10]={" new    " , " open   " , " save   " , " exit   "};
+	
+						//////////////////draw the main items in the file menu.///////////
+				///initialize the file name by "           ";
+				for(i=0;i<14;i++)
+					new_file_name[i]=' ';
+				new_file_name[14]='\0';
+				gotoxy(1,2);
+				for(i=0;i<4;i++)
+						{
+							if(i==pos)
+									textbackground(YELLOW);
+							gotoxy(1,i+2);
+							cprintf("%s",file_menu[i]);
+							textattr(highlight);
+						}
+				///////////////initilizing new file name//////////////////////
+				do{
+					key = getch();
+					if(key == esc)
+						break;
+					if(key == enter)
+					{
+						switch(pos)
+						{
+							case 0 :					//// means cursor on new
+								textbackground(BLACK);
+								clrscr();
+								
+								window(15,5,65,15);
+								textbackground(BLUE);
+								for(i=1;i<65;i++)
+								{
+									for(j = 1;j<10; j++)
+									{
+										gotoxy(i,j);
+										textbackground(BROWN);
+										cprintf("%c" , ' ');
+									}
+								}
+								gotoxy(20,5);
+								textcolor(BLACK);
+								cprintf("Add new PhoneBook");
+								
+								gotoxy(3,7);
+								cprintf("file name: ");
+								
+								
+								window(30,12,50,12);
+								gotoxy(1,1);
+								textbackground(BLUE);
+								for(i=0;i<sizeof(new_file_name);i++)
+									cprintf("%c" , new_file_name[i]);
+
+								break;
+						}
+					}
+					else if(key == NULL)
+						{
+							key = getch();
+							
+						///// handle the action
+						//hanlde right and left arrows in future
+						// we are here handling only up and down extended keys and alt_f to exit.
+						// all the key are extended
+					
+						switch(key)
+						{
+							case down : 
+								pos++;
+								if(pos>3)
+									pos=0;
+								
+							break;
+/*							case alt_v:
+							case right:
+								textattr(normal);
+								clrscr();
+								footer();
+								header(alt_v);
+	*/							
+							break;
+							case up :
+								pos--;
+								if(pos<0)
+									pos=3;
+							break;
+						
+							case alt_f :
+								
+								break;
+							
+							default :	
+								continue;
+						}	
+							window(1,2,11,5);
+							textbackground(WHITE);
+							
+							for(i=0;i<4;i++)
+							{
+								if(i==pos)
+										textbackground(YELLOW);
+								gotoxy(1,i+1);
+								cprintf("%s",file_menu[i]);
+								textattr(highlight);
+							}
+
+						}
+			}while(1);
+
+}
 //Hala
+
 void menu_view(void)
 {
 	char key;
@@ -156,7 +259,7 @@ void menu_view(void)
 						break;
 					case alt_f:
 					case left:
-						//call altf func
+						menu_file();								//// go to the file menu
 						break;
 					case alt_s:
 					case right:

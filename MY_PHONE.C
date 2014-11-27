@@ -18,45 +18,58 @@
 #define f2    		60
 #define right 		77
 #define left 		75
-void header(char);
-void footer(void);
-void menu_view(void);
+void draw_header(void);      //all
+void header(char);       //all
+void footer(void);       //all
+void menu_view(void);    //hala
+void phone_book(void);//char*);  //hala
 
 int main(void)
 {
 	char key;
-	int pos,i;
-	char menu[3][11]={" File     ", "View      ","Search    "};
-	textattr(normal);
 	clrscr();
 	footer();
 	flushall();
-	gotoxy(1,1);
-	textattr(highlight);
-	for(i=0; i<3; i++)
-		cprintf("%s", menu[i]);
-	cprintf("                                                  ");
+	draw_header();
 	key=getch();
-	if (key == NULL)
-		key=getch();
-	header(key);
 
 //Taher
 
 //Hala
+	if (key == NULL)  //to make header active all the time
+	{
+		key=getch();
+		switch(key)
+		{
+			case alt_f:
+			case alt_v:
+			case alt_s:
+				header(key);
+				break;
+		}
+	}
+
 
 //Heba
 
 //Sara
 
-
-
-
 	getch();
 	return 0;
 }
 
-
+void draw_header(void)
+{
+	int pos,i;
+	char menu[3][11]={" File     ", "View      ","Search    "};
+	textattr(normal);
+	gotoxy(1,1);
+	textattr(highlight);
+	for(i=0; i<3; i++)
+		cprintf("%s", menu[i]);
+	cprintf("                                                  ");
+	textattr(normal);
+}
 void header(char key)
 {
 
@@ -75,10 +88,8 @@ void header(char key)
 					menu_view();
 					break;
 	}
-
-
 		//hanlde right and left arrows in future
-
+\
 
 }
 
@@ -100,6 +111,7 @@ void menu_view(void)
 	int pos=0,i, stop=0, size=3;
 	char view_menu[3][35]={" Sort by name    ", " Sort by phone   "," Sort by address "};
 	flushall();
+	textattr(highlight);
 	gotoxy(10,2);
 	cprintf("-----------------");
 	do{
@@ -152,6 +164,21 @@ void menu_view(void)
 
 			case enter:
 				//pos cases
+				switch (pos)
+				{
+					case 0:
+						textattr(normal);
+						clrscr();
+						footer();
+						header(9);
+						phone_book();
+
+						break;
+					case 1:
+						break;
+					case 2:
+						break;
+				}
 				break;
 			case esc:
 				stop=1;
@@ -159,7 +186,13 @@ void menu_view(void)
 		}
 	}while(!stop);
 }
-
+void phone_book(void)//char* file)
+{
+	gotoxy(1,2);
+	textattr(highlight);
+	cprintf("    Name                   Phone               Address                          \n");
+	textattr(normal);
+}
 //Heba
 
 //Sara

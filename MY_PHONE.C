@@ -3,7 +3,7 @@
 
 #define esc 		27
 #define enter 		13
-#define up 			72
+#define up 		72
 #define down 		80
 #define home 		71
 #define end 		79
@@ -24,7 +24,7 @@ void header(char);       //all
 void footer(void);       //all
 void menu_view(void);    //hala
 void menu_file(void);   // taher
-void phone_book(void);//char*);  //hala
+void draw_phone_book(void);//char*);  //hala
 
 
 
@@ -32,13 +32,11 @@ int main(void)
 {
 	char key;
 	clrscr();
-	footer();
 
 	flushall();
+	footer();
 	draw_header();
 	key=getch();
-
-	
 //Taher
 
 //Hala
@@ -79,21 +77,19 @@ void draw_header(void)
 void header(char key)
 {
 	// Handle Alt+f, Alt+v, Alt+s
-
-	
 	switch(key)
 	{
-			case alt_f:
+				case alt_f:
 					menu_file();
 					break;
-				
+
 				case alt_s:
 					printf("keda s");
 					break;
 				case alt_v:
 					menu_view();
 					break;
-						
+
 	}
 	//hanlde right and left arrows in future
 
@@ -119,7 +115,7 @@ void menu_file(void)
 	int i = 0;
 	int pos=0;					///	to handle the current position of the cursor.
 	char file_menu[4][10]={" new    " , " open   " , " save   " , " exit   "};
-	
+
 						//////////////////draw the main items in the file menu.///////////
 				///initialize the file name by "           ";
 				for(i=0;i<14;i++)
@@ -146,7 +142,7 @@ void menu_file(void)
 							case 0 :					//// means cursor on new
 								textbackground(BLACK);
 								clrscr();
-								
+
 								window(15,5,65,15);
 								textbackground(BLUE);
 								for(i=1;i<65;i++)
@@ -161,11 +157,11 @@ void menu_file(void)
 								gotoxy(20,5);
 								textcolor(BLACK);
 								cprintf("Add new PhoneBook");
-								
+
 								gotoxy(3,7);
 								cprintf("file name: ");
-								
-								
+
+
 								window(30,12,50,12);
 								gotoxy(1,1);
 								textbackground(BLUE);
@@ -178,19 +174,19 @@ void menu_file(void)
 					else if(key == NULL)
 						{
 							key = getch();
-							
+
 						///// handle the action
 						//hanlde right and left arrows in future
 						// we are here handling only up and down extended keys and alt_f to exit.
 						// all the key are extended
-					
+
 						switch(key)
 						{
-							case down : 
+							case down :
 								pos++;
 								if(pos>3)
 									pos=0;
-								
+
 							break;
 /*							case alt_v:
 							case right:
@@ -198,24 +194,24 @@ void menu_file(void)
 								clrscr();
 								footer();
 								header(alt_v);
-	*/							
+	*/
 							break;
 							case up :
 								pos--;
 								if(pos<0)
 									pos=3;
 							break;
-						
+
 							case alt_f :
-								
+
 								break;
-							
-							default :	
+
+							default :
 								continue;
-						}	
+						}
 							window(1,2,11,5);
 							textbackground(WHITE);
-							
+
 							for(i=0;i<4;i++)
 							{
 								if(i==pos)
@@ -297,7 +293,9 @@ void menu_view(void)
 						clrscr();
 						footer();
 						draw_header();
-						phone_book();
+						draw_phone_book();
+						getch();
+						stop=1;
 						break;
 					case 1:
 						break;
@@ -311,12 +309,21 @@ void menu_view(void)
 		}
 	}while(!stop);
 }
-void phone_book(void)//char* file)
+void draw_phone_book(void)//char* file)
 {
 	gotoxy(1,2);
-	textattr(highlight);
-	cprintf("    Name                   Phone               Address                          \n");
+	textattr(0x17);
+	cprintf("   Name              ");
 	textattr(normal);
+	cprintf("  ");
+	textattr(0x17);
+	cprintf("   Phone              ");
+	textattr(normal);
+	cprintf("  ");
+	textattr(0x17);
+	cprintf("   Address                      \n");
+	textattr(normal);
+       //	getch();
 }
 //Heba
 

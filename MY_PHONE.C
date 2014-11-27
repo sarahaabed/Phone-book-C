@@ -25,12 +25,13 @@ void footer(void);       //all
 void menu_view(void);    //hala
 void menu_file(void);   // taher
 void draw_phone_book(void);//char*);  //hala
-
+void phone_book();
 
 
 int main(void)
 {
 	char key;
+	textattr(normal);
 	clrscr();
 
 	flushall();
@@ -67,6 +68,7 @@ void draw_header(void)
 	int pos,i;
 	char menu[3][11]={" File     ", "View      ","Search    "};
 	textattr(normal);
+	//clrscr();
 	gotoxy(1,1);
 	textattr(highlight);
 	for(i=0; i<3; i++)
@@ -100,6 +102,7 @@ void footer(void)
 	gotoxy(1,25);
 	textattr(highlight);
 	cprintf("  Alt+f File    Alt+V  View     Alt+s  Search                                  ");
+	gotoxy(1,1);
 	textattr(normal);
 }
 
@@ -285,21 +288,27 @@ void menu_view(void)
 				break;
 
 			case enter:
+				textattr(normal);
+				clrscr();
+				footer();
+				draw_header();
+				draw_phone_book();
+				getch();
+				stop=1;
+
+				//read from file func
 				//pos cases
 				switch (pos)
 				{
+
 					case 0:
-						textattr(normal);
-						clrscr();
-						footer();
-						draw_header();
-						draw_phone_book();
-						getch();
-						stop=1;
+						//sort by name func
 						break;
 					case 1:
+						//sort by phone func
 						break;
 					case 2:
+						//sort by address func
 						break;
 				}
 				break;
@@ -309,6 +318,7 @@ void menu_view(void)
 		}
 	}while(!stop);
 }
+
 void draw_phone_book(void)//char* file)
 {
 	gotoxy(1,2);
@@ -321,10 +331,72 @@ void draw_phone_book(void)//char* file)
 	textattr(normal);
 	cprintf("  ");
 	textattr(0x17);
-	cprintf("   Address                      \n");
+	cprintf("   Address                       \n");
+	textattr(highlight);
+	gotoxy(1,25);
+	cprintf("  Ins Insert   Del Delete   F2 Edit   Up/Down Move                          ");
+	gotoxy(1,3);
 	textattr(normal);
-       //	getch();
+	phone_book();
 }
+
+void phone_book()
+{
+	int pos=0, stop=0;
+	char key;
+	int size;  //number of records in phone book
+	do{
+		flushall();
+		key=getch();
+		switch (key)
+		{
+			case NULL:
+				key=getch();
+				switch (key)
+				{
+					case up:
+						pos--;
+						if (pos<0)
+							pos=size-1;
+						break;
+					case down:
+						pos++;
+						if (pos >size-1)
+							pos=0;
+						break;
+					case alt_f:
+					case alt_s:
+					case alt_v:
+						header(key);
+						break;
+					//Operations on records
+					case insert:
+						// add record func
+						break;
+					case del:
+						//sure?? func
+						break;
+					case f2:
+						//edit func
+						break;
+				}
+				break;
+			case tab:
+				pos++;
+				if (pos >size-1)
+					pos=0;
+				break;
+
+			case enter:
+				//show record
+				break;
+			case esc:
+				stop=1;
+				break;
+		}
+	}while(!stop);
+}
+
 //Heba
 
 //Sara

@@ -9,6 +9,7 @@
 #define end 		79
 #define normal 		0x07
 #define highlight 	0x70
+#define highlight2    	0x3f
 #define tab 		9
 #define alt_f 		33
 #define alt_s 		31
@@ -18,6 +19,8 @@
 #define f2    		60
 #define right 		77
 #define left 		75
+#define ok               111
+#define cancel           99
 
 void draw_header(void);      //all
 void header(char);       //all
@@ -31,6 +34,7 @@ void menu_search(void);     //heba
 void unshow_search_menu(void);  //heba
 void search_by(void);        //heba
 
+void SaveFile(void) ; //sarah
 
 int main(void)
 {
@@ -576,3 +580,114 @@ void search_by(void){
 		
 }
 //Sara
+void SaveFile(void)
+{
+     char SaveOptions[2][10]={" Ok "," Cancel "};
+	int i,j,terminate=0,pos=0,step=0 ;
+	char SaveSelection ;
+	clrscr();
+	textattr(highlight);
+	gotoxy(35,13);
+	printf("Are  You Sure ? \n");
+
+       for(i=0;i<25;i++)
+	{
+		gotoxy(30+i,12);
+		printf("-");
+		gotoxy(30+i,17);
+		printf("-");
+
+	}
+
+		gotoxy(35,15);
+
+       do{
+
+       step=0;
+		for(j=0;j<2;j++)
+
+		{
+		       if(j==pos)
+				textbackground(BLUE);
+
+			gotoxy(35+step,15) ;
+
+			cprintf("%s",SaveOptions[j]);
+			 textattr(highlight2);
+		       //	printf("   ") ;
+
+		       step+=8;
+
+		}
+
+		flushall();
+		SaveSelection=getch();
+		switch(SaveSelection)
+		{
+			case NULL:
+				SaveSelection=getch();
+				switch(SaveSelection)
+				{
+
+
+					case left:
+					pos--;
+					if(pos<0)
+						pos=1;
+					break;
+
+					case right:
+					pos++;
+					if(pos>1)
+						pos=0;
+					break;
+
+				}
+
+			break;
+		case enter :
+			switch(pos)
+			{
+				case 0:
+					printf("\n\n\n ok handling in progress...\n");
+
+
+				break;
+				case 1:
+					terminate=1;
+
+				break;
+			}
+		break;
+
+
+			case tab:
+					pos++;
+					if(pos>1)
+						pos=0;
+			break;
+
+
+			case ok:
+			       //	getch()
+				printf("\n\n\n ok handling in progress...\n");
+				pos=0;
+			break;
+
+			case cancel:
+				printf("\n\n\n cancelling...\n");
+				pos=1;
+				terminate=1;
+			break;
+
+			case esc:
+				terminate=1;
+			break;
+
+
+		}
+
+       }while(!terminate);
+
+
+}

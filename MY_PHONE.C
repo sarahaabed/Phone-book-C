@@ -9,6 +9,7 @@
 #define end 		79
 #define normal 		0x07
 #define highlight 	0x70
+#define hilight         0x70
 #define highlight2    	0x3f
 #define tab 		9
 #define alt_f 		33
@@ -35,6 +36,7 @@ void unshow_search_menu(void);  //heba
 void search_by(void);        //heba
 
 void SaveFile(void) ; //sarah
+void OpenFile(void) ; //sarah
 
 int main(void)
 {
@@ -690,4 +692,111 @@ void SaveFile(void)
        }while(!terminate);
 
 
+}
+void OpenFile(void)
+{
+int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
+char key;
+char *startptr,*currentptr,*endptr;
+char text[21];
+currentptr=text;
+startptr=text;
+endptr=text;
+	textattr(normal);
+	clrscr();
+	gotoxy(8,13) ;
+	for(i=0;i<40;i++)
+		{
+		gotoxy(8+i,13) ;
+		cprintf("-");
+		gotoxy(8+i,20) ;
+		cprintf("-");
+
+		}
+
+	gotoxy(10,15);
+	printf("Open File : ");
+	gotoxy(25,17);
+	textattr(hilight) ;
+	cprintf("\n OK ") ;
+	for(i=0;i<21;i++)
+	{
+	gotoxy(20+i,15);
+	textattr(hilight);
+	cprintf(" ");
+	}
+
+   while(!term){
+
+	 gotoxy(currentcol,15);
+	 key=getch();
+		if (key==NULL)
+			key=getch();
+
+		switch(key){
+
+
+			case right :
+				if(currentcol<41){
+					currentcol++;
+					currentptr++;
+					  }
+		break;
+		case left:
+			if(currentcol>0 && currentcol>startcol)
+			{
+				currentcol--;
+				currentptr--;
+			}
+		break ;
+		case end:
+				currentcol=endcol;
+				currentptr=endptr;
+
+		break;
+		case home:
+			currentcol=startcol;
+			currentptr=startptr;
+
+		break ;
+
+		case up :
+			continue;
+		break;
+
+		case down :
+			continue;
+		break;
+
+    case enter:
+	textattr(normal);
+	clrscr();
+	*endptr='\0';
+	printf("opening......\n");
+	term=1;
+    break ;
+    case esc :
+			term=1;
+    break;
+    default:
+		gotoxy(currentcol,15);
+		*currentptr=key;
+
+	      if(currentcol<41) {
+		 currentcol++;
+		 currentptr++;
+		 }
+		 if(endcol<currentcol)
+		 {
+			endcol++;
+			endptr++;
+
+		  }
+		  textattr(hilight);
+		  cprintf("%c",key);
+
+
+
+    }
+ }
 }

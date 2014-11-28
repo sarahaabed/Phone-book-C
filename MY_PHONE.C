@@ -718,6 +718,12 @@ endptr=text;
 		}
 		}
 
+
+		gotoxy(20,7);
+		textbackground(BLUE);
+		for(i=0;i<20;i++)
+			cprintf(" ");
+
 	textattr(normal);
 	gotoxy(5,7);
 	printf("Open File : ");

@@ -9,6 +9,8 @@
 #define end 		79
 #define normal 		0x07
 #define highlight 	0x70
+#define hilight         0x70
+#define highlight2    	0x3f
 #define tab 		9
 #define alt_f 		33
 #define alt_s 		31
@@ -18,7 +20,11 @@
 #define f2    		60
 #define right 		77
 #define left 		75
+
 #define	choosen		1x70
+
+#define ok               111
+#define cancel           99
 
 void draw_header(void);      //all
 void header(char);       //all
@@ -26,13 +32,22 @@ void footer(void);       //all
 void menu_view(void);    //hala
 void menu_file(void);   // taher
 void draw_phone_book(void);//char*);  //hala
+
 void new_file_window(void);			//taher
 
+void phone_book();
 
+void menu_search(void);     //heba
+void unshow_search_menu(void);  //heba
+void search_by(void);        //heba
+
+void SaveFile(void) ; //sarah
+void OpenFile(void) ; //sarah
 
 int main(void)
 {
 	char key;
+	textattr(normal);
 	clrscr();
 
 	flushall();
@@ -69,6 +84,7 @@ void draw_header(void)
 	int pos,i;
 	char menu[3][11]={" File     ", "View      ","Search    "};
 	textattr(normal);
+	//clrscr();
 	gotoxy(1,1);
 	textattr(highlight);
 	for(i=0; i<3; i++)
@@ -86,7 +102,7 @@ void header(char key)
 					break;
 
 				case alt_s:
-					printf("keda s");
+					menu_search();
 					break;
 				case alt_v:
 					menu_view();
@@ -103,6 +119,7 @@ void footer(void)
 	gotoxy(1,25);
 	textattr(highlight);
 	cprintf("  Alt+f File    Alt+V  View     Alt+s  Search                                  ");
+	gotoxy(1,1);
 	textattr(normal);
 }
 
@@ -414,21 +431,27 @@ void menu_view(void)
 				break;
 
 			case enter:
+				textattr(normal);
+				clrscr();
+				footer();
+				draw_header();
+				draw_phone_book();
+				getch();
+				stop=1;
+
+				//read from file func
 				//pos cases
 				switch (pos)
 				{
+
 					case 0:
-						textattr(normal);
-						clrscr();
-						footer();
-						draw_header();
-						draw_phone_book();
-						getch();
-						stop=1;
+						//sort by name func
 						break;
 					case 1:
+						//sort by phone func
 						break;
 					case 2:
+						//sort by address func
 						break;
 				}
 				break;
@@ -438,6 +461,7 @@ void menu_view(void)
 		}
 	}while(!stop);
 }
+
 void draw_phone_book(void)//char* file)
 {
 	gotoxy(1,2);
@@ -450,10 +474,462 @@ void draw_phone_book(void)//char* file)
 	textattr(normal);
 	cprintf("  ");
 	textattr(0x17);
-	cprintf("   Address                      \n");
+	cprintf("   Address                       \n");
+	textattr(highlight);
+	gotoxy(1,25);
+	cprintf("  Ins Insert   Del Delete   F2 Edit   Up/Down Move                          ");
+	gotoxy(1,3);
 	textattr(normal);
-       //	getch();
+	phone_book();
 }
+
+void phone_book()
+{
+	int pos=0, stop=0;
+	char key;
+	int size;  //number of records in phone book
+	do{
+		flushall();
+		key=getch();
+		switch (key)
+		{
+			case NULL:
+				key=getch();
+				switch (key)
+				{
+					case up:
+						pos--;
+						if (pos<0)
+							pos=size-1;
+						break;
+					case down:
+						pos++;
+						if (pos >size-1)
+							pos=0;
+						break;
+					case alt_f:
+					case alt_s:
+					case alt_v:
+						header(key);
+						break;
+					//Operations on records
+					case insert:
+						// add record func
+						break;
+					case del:
+						//sure?? func
+						break;
+					case f2:
+						//edit func
+						break;
+				}
+				break;
+			case tab:
+				pos++;
+				if (pos >size-1)
+					pos=0;
+				break;
+
+			case enter:
+				//show record
+				break;
+			case esc:
+				stop=1;
+				break;
+		}
+	}while(!stop);
+}
+
 //Heba
 
+void menu_search(void){
+	char search_menu[2][13]={"  by name   ","  by phone  "};
+	int pos=0,i, size=2, page=0;
+	char key;
+	int terminate;
+/* 	window(10,2,19,5);
+	textattr(highlight); */
+	textattr(highlight);
+	flushall();
+	gotoxy(21,2);
+	cprintf("------------");
+	do{
+		//window(1,20,4,30);
+		textbackground(WHITE);
+		for(i=0;i<size;i++)
+		{
+			if(i==pos)
+				textbackground(YELLOW);
+			gotoxy(21,i+3);
+			cprintf("%s",search_menu[i]);
+			textattr(highlight);
+		}
+		gotoxy(21,3+size);
+		cprintf("------------");
+
+		flushall();
+		key=getch();
+		switch(key){
+			case enter:
+					switch(pos){
+						case 0:
+							unshow_search_menu();
+							search_by();
+							getch();
+							terminate=1;
+							break;
+
+						case 1:
+							clrscr();
+							printf("\n Display Action Down here \n\n press any key to continuo");
+							getch();
+							break;					
+						}
+					break;
+
+			case esc:
+				terminate=1;
+				break;
+
+			case tab:
+				pos--;
+				if(pos<0) pos=2;
+				break;
+
+			case NULL:
+				key=getch();
+				switch(key){
+
+					case up:
+						pos--;
+						if(pos<0) pos=2;
+						break;
+
+					/* case PageUp:
+						pos--;
+						if(pos<0) pos=2;
+						break; */
+
+					case down:
+						pos++;
+						if(pos>2) pos=0;
+						break;
+
+					/* case PageDown:
+						pos++;
+						if(pos>2) pos=0;
+						break ; */
+
+					case home:
+						pos=0;
+						break;
+
+					case end:
+						pos=2;
+						break;
+
+					case alt_f:
+						//menu_view();
+						terminate=1;
+						page=1;
+						break;
+
+					case alt_v:
+						//menu_view();
+						terminate=1;
+						page=2;
+						break;
+
+					case alt_s:
+						//menu_view();
+						terminate=1;
+						page=3;
+						break;
+				}
+				break;
+
+		}
+	}while(terminate!=1);
+	if(page==1){
+		unshow_search_menu();
+		menu_file();
+	}
+	else if(page==2){
+		unshow_search_menu();
+		menu_view();
+	}
+	else if(page==3){
+		unshow_search_menu();
+		menu_search();
+	}
+}
+
+void unshow_search_menu(void){
+	char search_menu[2][13]={"            ","            "};
+	int i,size=2;
+	flushall();
+	textattr(normal);
+	gotoxy(21,2);
+	cprintf("            ");
+	for(i=0;i<size;i++)
+	{
+			gotoxy(21,i+3);
+			cprintf("%s",search_menu[i]);
+			textattr(normal);
+	}
+		gotoxy(21,3+size);
+		cprintf("            ");
+}
+
+void search_by(void){
+		int i ,j;
+		char Name[10];
+
+		window(19,11,60,18);
+		textbackground(BLUE);
+		for(i=1;i<65;i++)
+		{
+			for(j = 1;j<10; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(16,2);
+		textcolor(BLACK);
+		printf("Search By Name\n");
+
+		gotoxy(10,4);
+		printf("Name: ");
+
+
+		window(35,14,50,14);
+		gotoxy(1,1);
+		textbackground(BLUE);
+		for(i=0;i<15;i++){
+			cprintf("%c" , ' ');
+		}
+		gotoxy(1,1);
+		// getch search word
+		
+		
+}
 //Sara
+void SaveFile(void)
+{
+     char SaveOptions[2][10]={" Ok "," Cancel "};
+	int i,j,terminate=0,pos=0,step=0 ;
+	char SaveSelection ;
+	clrscr();
+	textattr(highlight);
+	gotoxy(35,13);
+	printf("Are  You Sure ? \n");
+
+       for(i=0;i<25;i++)
+	{
+		gotoxy(30+i,12);
+		printf("-");
+		gotoxy(30+i,17);
+		printf("-");
+
+	}
+
+		gotoxy(35,15);
+
+       do{
+
+       step=0;
+		for(j=0;j<2;j++)
+
+		{
+		       if(j==pos)
+				textbackground(BLUE);
+
+			gotoxy(35+step,15) ;
+
+			cprintf("%s",SaveOptions[j]);
+			 textattr(highlight2);
+		       //	printf("   ") ;
+
+		       step+=8;
+
+		}
+
+		flushall();
+		SaveSelection=getch();
+		switch(SaveSelection)
+		{
+			case NULL:
+				SaveSelection=getch();
+				switch(SaveSelection)
+				{
+
+
+					case left:
+					pos--;
+					if(pos<0)
+						pos=1;
+					break;
+
+					case right:
+					pos++;
+					if(pos>1)
+						pos=0;
+					break;
+
+				}
+
+			break;
+		case enter :
+			switch(pos)
+			{
+				case 0:
+					printf("\n\n\n ok handling in progress...\n");
+
+
+				break;
+				case 1:
+					terminate=1;
+
+				break;
+			}
+		break;
+
+
+			case tab:
+					pos++;
+					if(pos>1)
+						pos=0;
+			break;
+
+
+			case ok:
+			       //	getch()
+				printf("\n\n\n ok handling in progress...\n");
+				pos=0;
+			break;
+
+			case cancel:
+				printf("\n\n\n cancelling...\n");
+				pos=1;
+				terminate=1;
+			break;
+
+			case esc:
+				terminate=1;
+			break;
+
+
+		}
+
+       }while(!terminate);
+
+
+}
+void OpenFile(void)
+{
+int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
+char key;
+char *startptr,*currentptr,*endptr;
+char text[21];
+currentptr=text;
+startptr=text;
+endptr=text;
+	textattr(normal);
+	clrscr();
+	gotoxy(8,13) ;
+	for(i=0;i<40;i++)
+		{
+		gotoxy(8+i,13) ;
+		cprintf("-");
+		gotoxy(8+i,20) ;
+		cprintf("-");
+
+		}
+
+	gotoxy(10,15);
+	printf("Open File : ");
+	gotoxy(25,17);
+	textattr(hilight) ;
+	cprintf("\n OK ") ;
+	for(i=0;i<21;i++)
+	{
+	gotoxy(20+i,15);
+	textattr(hilight);
+	cprintf(" ");
+	}
+
+   while(!term){
+
+	 gotoxy(currentcol,15);
+	 key=getch();
+		if (key==NULL)
+			key=getch();
+
+		switch(key){
+
+
+			case right :
+				if(currentcol<41){
+					currentcol++;
+					currentptr++;
+					  }
+		break;
+		case left:
+			if(currentcol>0 && currentcol>startcol)
+			{
+				currentcol--;
+				currentptr--;
+			}
+		break ;
+		case end:
+				currentcol=endcol;
+				currentptr=endptr;
+
+		break;
+		case home:
+			currentcol=startcol;
+			currentptr=startptr;
+
+		break ;
+
+		case up :
+			continue;
+		break;
+
+		case down :
+			continue;
+		break;
+
+    case enter:
+	textattr(normal);
+	clrscr();
+	*endptr='\0';
+	printf("opening......\n");
+	term=1;
+    break ;
+    case esc :
+			term=1;
+    break;
+    default:
+		gotoxy(currentcol,15);
+		*currentptr=key;
+
+	      if(currentcol<41) {
+		 currentcol++;
+		 currentptr++;
+		 }
+		 if(endcol<currentcol)
+		 {
+			endcol++;
+			endptr++;
+
+		  }
+		  textattr(hilight);
+		  cprintf("%c",key);
+
+
+
+    }
+ }
+}

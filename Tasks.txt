@@ -19,5 +19,5 @@ Result --> Search result
 
 Taher --> (file, new)
 Heba --> (Search, Search result)
-Hala  --> (view, phone book)
+Hala  --> (view, phone book)            -->interface done
 sara --> (open, sure?? , edit record)

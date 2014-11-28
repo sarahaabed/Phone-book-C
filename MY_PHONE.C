@@ -18,6 +18,7 @@
 #define f2    		60
 #define right 		77
 #define left 		75
+#define	choosen		1x70
 
 void draw_header(void);      //all
 void header(char);       //all
@@ -25,6 +26,7 @@ void footer(void);       //all
 void menu_view(void);    //hala
 void menu_file(void);   // taher
 void draw_phone_book(void);//char*);  //hala
+void new_file_window(void);			//taher
 
 
 
@@ -89,6 +91,7 @@ void header(char key)
 				case alt_v:
 					menu_view();
 					break;
+				
 
 	}
 	//hanlde right and left arrows in future
@@ -109,19 +112,18 @@ void footer(void)
 void menu_file(void)
 {
 	char key;
-	char new_file_name[15];
 	int terminate=0;
-	int j = 0 ;
 	int i = 0;
-	int pos=0;					///	to handle the current position of the cursor.
-	char file_menu[4][10]={" new    " , " open   " , " save   " , " exit   "};
+	int pos=0;		///	to handle the current position of the cursor.
+	char file_menu[4][20]={"   new    " , "   open   " , "   save   " , "   exit   "};
 
-						//////////////////draw the main items in the file menu.///////////
-				///initialize the file name by "           ";
-				for(i=0;i<14;i++)
-					new_file_name[i]=' ';
-				new_file_name[14]='\0';
+ 						//////////////////draw the main items in the file menu.///////////
+				clrscr();
+				textattr(normal);
+				footer();
+				draw_header();
 				gotoxy(1,2);
+				////dy awel marra
 				for(i=0;i<4;i++)
 						{
 							if(i==pos)
@@ -130,6 +132,7 @@ void menu_file(void)
 							cprintf("%s",file_menu[i]);
 							textattr(highlight);
 						}
+						
 				///////////////initilizing new file name//////////////////////
 				do{
 					key = getch();
@@ -139,36 +142,13 @@ void menu_file(void)
 					{
 						switch(pos)
 						{
-							case 0 :					//// means cursor on new
-								textbackground(BLACK);
-								clrscr();
-
-								window(15,5,65,15);
-								textbackground(BLUE);
-								for(i=1;i<65;i++)
-								{
-									for(j = 1;j<10; j++)
-									{
-										gotoxy(i,j);
-										textbackground(BROWN);
-										cprintf("%c" , ' ');
-									}
-								}
-								gotoxy(20,5);
-								textcolor(BLACK);
-								cprintf("Add new PhoneBook");
-
-								gotoxy(3,7);
-								cprintf("file name: ");
-
-
-								window(30,12,50,12);
-								gotoxy(1,1);
-								textbackground(BLUE);
-								for(i=0;i<sizeof(new_file_name);i++)
-									cprintf("%c" , new_file_name[i]);
-
-								break;
+							case 0 :							//// means cursor on new
+							textbackground(BLACK);
+							clrscr();
+							footer();
+							draw_header();
+							new_file_window();
+							break;
 						}
 					}
 					else if(key == NULL)
@@ -194,8 +174,9 @@ void menu_file(void)
 								clrscr();
 								footer();
 								header(alt_v);
+								break;
 	*/
-							break;
+							
 							case up :
 								pos--;
 								if(pos<0)
@@ -203,7 +184,10 @@ void menu_file(void)
 							break;
 
 							case alt_f :
-
+								textattr(normal);
+								clrscr();
+								footer();
+								draw_header();	
 								break;
 
 							default :
@@ -225,6 +209,151 @@ void menu_file(void)
 			}while(1);
 
 }
+
+void new_file_window(void)
+{
+	int j =0;
+	int inner_pos=1;
+	int i = 0;
+	char key;
+	char new_file_name[15];
+	char window_buttons[3][15]={"             ","    OK    ","  CANCEL  "};
+
+		///initialize the file name by "           ";
+				for(i=0;i<14;i++)
+					new_file_name[i]=' ';
+				new_file_name[14]='\0';
+			
+	
+									
+								
+								/////////////popup window to get the file name
+								
+								window(15,5,65,15);
+								textbackground(BLACK);
+									clrscr();
+								textbackground(BLUE);
+								for(i=1;i<65;i++)
+								{
+									for(j = 1;j<10; j++)
+									{
+										gotoxy(i,j);
+										textbackground(BLUE);
+										cprintf("%c" , ' ');
+									}
+								}
+								gotoxy(20,5);
+								textcolor(BLACK);
+								cprintf("Add new PhoneBook");
+
+								gotoxy(3,7);
+								cprintf("file name: ");
+
+								gotoxy(20,7);
+								textbackground(WHITE);
+								cprintf("%s",window_buttons[0]);	
+
+								gotoxy(15,9);
+								textattr(highlight);
+								cprintf("%s",window_buttons[1]);	
+
+								gotoxy(30,9);
+								textattr(highlight);
+								cprintf("%s",window_buttons[2]);	
+							do
+								{
+												
+								/////////////////
+								key=getch();
+								////////////////	
+								if(key==enter)
+									{
+										break;
+									}
+								else if(key==esc)
+									{
+										break;
+									}
+								else if (key==tab)
+									{
+										inner_pos++;
+										if(inner_pos>2)
+											inner_pos=0;
+//										break;
+									}
+								else
+									{
+										key=getch();
+										switch(key)
+											{
+											case right :
+													if(inner_pos==1)
+														inner_pos++;
+													else if(inner_pos>2)
+														inner_pos=1;
+													else if(inner_pos==0)
+														inner_pos = 0;
+													break;
+													
+												case left :
+													if(inner_pos==2)
+														inner_pos--;
+													else if(inner_pos==1)
+														inner_pos=1;
+													else if(inner_pos==0)
+														inner_pos = 0;
+													break;
+												
+											}
+									}
+									
+									if(inner_pos==0)
+										{
+											gotoxy(20,7);
+											textbackground(WHITE);
+											cprintf("%s",window_buttons[0]);
+											
+											gotoxy(30,9);
+											textattr(highlight);
+											cprintf("%s",window_buttons[2]);
+											gotoxy(15,9);
+											textattr(highlight);
+											cprintf("%s",window_buttons[1]);
+
+											gotoxy(20,7);
+											scanf("%s",new_file_name);
+										}
+
+									if(inner_pos==1)
+										{
+											gotoxy(15,9);
+											textbackground(YELLOW);
+											textcolor(BLACK);
+											cprintf("%s",window_buttons[1]);
+											
+											gotoxy(30,9);
+											textattr(highlight);
+											cprintf("%s",window_buttons[2]);
+
+										}
+
+									if(inner_pos==2)
+										{
+
+											gotoxy(15,9);
+											textattr(highlight);
+											cprintf("%s",window_buttons[1]);
+											
+											gotoxy(30,9);
+											textbackground(YELLOW);
+											textcolor(BLACK);
+											cprintf("%s",window_buttons[2]);
+											
+										}
+									
+							}while(1);
+}
+
 //Hala
 
 void menu_view(void)

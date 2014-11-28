@@ -37,6 +37,7 @@ void search_by(void);        //heba
 
 void SaveFile(void) ; //sarah
 void OpenFile(void) ; //sarah
+void EditRecord(void); //sarah
 
 int main(void)
 {
@@ -785,6 +786,125 @@ endptr=text;
 
 
 				term=1;
+			break ;
+			 case esc :
+				term=1;
+			 break;
+			  default:
+				gotoxy(currentcol,15);
+				*currentptr=key;
+
+			 if(currentcol<41) {
+			 currentcol++;
+			 currentptr++;
+					 }
+			 if(endcol<currentcol)
+				{
+					endcol++;
+					endptr++;
+
+				  }
+			  textattr(hilight);
+			 cprintf("%c",key);
+
+
+
+		  }
+	 }
+}
+void EditRec (void)
+{
+
+int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
+char key;
+char *startptr,*currentptr,*endptr;
+char EditFeilds[3][16]={"Name","phone","address"},text[21];
+int j,step,row=5;
+currentptr=text;
+startptr=text;
+endptr=text;
+
+		textattr(normal);
+		clrscr();
+		window(15,5,65,15);
+		for(i=1;i<65;i++)
+		{
+		for(j = 1;j<10; j++)
+		{
+			gotoxy(i,j);
+			textbackground(BROWN);
+			cprintf("%c" , ' ');
+		}
+		}
+
+	      for(i=0;i<3;i++)
+	      {
+		gotoxy(12,5+step);
+		puts(EditFeilds[i]);
+		gotoxy(20,5+step) ;
+		textbackground(BLUE);
+		for(j=0;j<22;j++)
+			cprintf(" ");
+		step+=2;
+
+	       }
+	       gotoxy(30,11);
+	       textattr(hilight) ;
+	       cprintf(" OK ");
+
+   while(!term){
+
+
+	 gotoxy(currentcol,row);
+	 key=getch();
+		if (key==NULL)
+			key=getch();
+
+		switch(key){
+
+
+			case right :
+				if(currentcol<41){
+					currentcol++;
+					currentptr++;
+						  }
+			break;
+			case left:
+				if(currentcol>0 && currentcol>startcol)
+				{
+				currentcol--;
+				currentptr--;
+				}
+			break ;
+			case end:
+				currentcol=endcol;
+				currentptr=endptr;
+
+			break;
+			case home:
+				currentcol=startcol;
+				currentptr=startptr;
+
+			break ;
+
+			case up :
+				row-=2;
+				if(row>5)
+				row=9;
+			break;
+
+			case down :
+				row+=2;
+				if(row>11)
+				row=5;
+			break;
+
+			case enter:
+				textattr(normal);
+				clrscr();
+				*endptr='\0';
+		     //		puts(text);   //text hold only last record
+				term=1;       //i have to make extra two text arrays
 			break ;
 			 case esc :
 				term=1;

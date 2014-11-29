@@ -22,52 +22,37 @@
 #define left 		75
 #define ok               111
 #define cancel           99
-#define backspace   8
 
-struct contact{
-	char name[10];
-	int phone;
-	char address[20];
-	struct contact * prev;
-	struct contact * next;
-
-};  //heba
-
-//global variable
-struct contact * head , * tail; // heba
-
-void draw_header(void);      //all
-void header(char);       //all
+void draw_header(void);   //all
+void header(char);        //all
 void footer(void);       //all
 void menu_view(void);    //hala
-void menu_file(void);   // taher
+void menu_file(void);    //taher
 void draw_phone_book(void);//char*);  //hala
 void phone_book();
 
 void menu_search(void);     //heba
 void unshow_search_menu(void);  //heba
-void search_by(int by_type);       //heba
-void deleteChar(char *pt,int pos,int size, int button); // heba
+void search_by(void);        //heba
 
 void SaveFile(void) ; //sarah
 void OpenFile(void) ; //sarah
-void EditRecord(void); //sarah
+void EditRecord(void);//sarah this will call CreatLineEditor 3 times
+char *LineEditor(int col,int row); //sarah
 
 int main(void)
 {
 	char key;
-	int terminate=0; // heba
 	textattr(normal);
 	clrscr();
 
 	flushall();
 	footer();
 	draw_header();
+	key=getch();
 //Taher
 
 //Hala
-do{
-    key=getch();
 	if (key == NULL)  //to make header active all the time
 	{
 		key=getch();
@@ -83,12 +68,6 @@ do{
 
 
 //Heba
-		else if(key==esc){
-			terminate=1;
-		}
-		
-//Heba
-	}while(!terminate); //heba
 
 //Sara
 
@@ -434,11 +413,11 @@ void phone_book()
 
 void menu_search(void){
 	char search_menu[2][13]={"  by name   ","  by phone  "};
-	
-	int pos=0,i, size=2 , page;
+	int pos=0,i, size=2, page=0;
 	char key;
-	int terminate=0;
-
+	int terminate;
+/* 	window(10,2,19,5);
+	textattr(highlight); */
 	textattr(highlight);
 	flushall();
 	gotoxy(21,2);
@@ -447,9 +426,9 @@ void menu_search(void){
 		//window(1,20,4,30);
 		textbackground(WHITE);
 		for(i=0;i<size;i++)
-		{ 
+		{
 			if(i==pos)
-			textbackground(YELLOW);
+				textbackground(YELLOW);
 			gotoxy(21,i+3);
 			cprintf("%s",search_menu[i]);
 			textattr(highlight);
@@ -464,24 +443,21 @@ void menu_search(void){
 					switch(pos){
 						case 0:
 							unshow_search_menu();
-							search_by(1);
+							search_by();
+							getch();
 							terminate=1;
-							page=0;
 							break;
 
 						case 1:
-							unshow_search_menu();
-							search_by(2);
-							terminate=1;
-							page=0;
+							clrscr();
+							printf("\n Display Action Down here \n\n press any key to continuo");
+							getch();
 							break;
 						}
 					break;
 
 			case esc:
-				unshow_search_menu();
-				terminate=0;
-				page=0;
+				terminate=1;
 				break;
 
 			case tab:
@@ -498,10 +474,20 @@ void menu_search(void){
 						if(pos<0) pos=2;
 						break;
 
+					/* case PageUp:
+						pos--;
+						if(pos<0) pos=2;
+						break; */
+
 					case down:
 						pos++;
 						if(pos>2) pos=0;
 						break;
+
+					/* case PageDown:
+						pos++;
+						if(pos>2) pos=0;
+						break ; */
 
 					case home:
 						pos=0;
@@ -512,16 +498,19 @@ void menu_search(void){
 						break;
 
 					case alt_f:
+						//menu_view();
 						terminate=1;
 						page=1;
 						break;
 
 					case alt_v:
+						//menu_view();
 						terminate=1;
 						page=2;
 						break;
 
 					case alt_s:
+						//menu_view();
 						terminate=1;
 						page=3;
 						break;
@@ -529,7 +518,7 @@ void menu_search(void){
 				break;
 
 		}
-	}while(!terminate);
+	}while(terminate!=1);
 	if(page==1){
 		unshow_search_menu();
 		menu_file();
@@ -561,340 +550,39 @@ void unshow_search_menu(void){
 		cprintf("            ");
 }
 
-void search_by(int by_type){
-		
-		int i,j,checkPrint,stop;
-		int pos=0,terminate=0,End=0,page=0;
-		char name[10];
-		char key;
-		char * ptr;
-		ptr=name;
-		//window(19,11,60,18);
-		//textbackground(BLUE);
-		for(i=19;i<65;i++){
-			for(j = 7;j<16; j++){
+void search_by(void){
+		int i ,j;
+		char Name[10];
+
+		window(19,11,60,18);
+		textbackground(BLUE);
+		for(i=1;i<65;i++)
+		{
+			for(j = 1;j<10; j++){
 				gotoxy(i,j);
 				textbackground(BROWN);
 				cprintf("%c" , ' ');
 			}
 		}
-		gotoxy(35,8);
+		gotoxy(16,2);
 		textcolor(BLACK);
 		printf("Search By Name\n");
 
-		if(by_type==1){
-			gotoxy(28,10);
-			printf("Name: ");
-		}
-		else{
-			gotoxy(28,10);
-			printf("Phone: ");
-		}
+		gotoxy(10,4);
+		printf("Name: ");
 
-		
-		// draw button
-		gotoxy(35,13);
-	    printf("Search");
-		textcolor(BLACK);
-		
-		gotoxy(45,13);
-	    printf("Cancel");
-		textcolor(BLACK);
-	
-	
-		gotoxy(35,10);
+
+		window(35,14,50,14);
+		gotoxy(1,1);
 		textbackground(BLUE);
-		for(i=35;i<51;i++){
+		for(i=0;i<15;i++){
 			cprintf("%c" , ' ');
-			gotoxy(i+1,10);
 		}
-		 
-			
-		gotoxy(35,10);
-		//***************** Enter Search Word (Phone , Name)*************************//
-	   do{
-			key=getch();
-			stop=key;
-			switch(stop){
-
-				case backspace:
-					if(page==0){
-						pos--;
-						if(pos<0) pos=0;
-						else{
-							deleteChar(ptr,pos-1,End,backspace);
-							End=End-1;
-						}
-					}
-					break;
-				
-				case esc :
-					terminate=1;
-					break;
-					
-				case enter:
-					if(page==2){
-						
-					}
-					else if (page==1){
-						for(i=19;i<65;i++){
-							for(j = 7;j<16; j++){
-								gotoxy(i,j);
-								textbackground(highlight);
-								cprintf("%c" , ' ');
-							}
-						}
-						terminate=1;
-					}
-					break;
-
-				case NULL:
-					stop=getch();
-					switch(stop){
-						case esc:
-							terminate=1;
-							break;
-
-						case home:
-						   if(page==0){
-								pos=0;
-								gotoxy(35+pos,10);	
-							}
-							break;
-
-						case end:
-							if(page==0){
-								pos=end;
-								gotoxy(35+pos,10);
-							}
-							break;
-							
-						case left:
-							if(page==0){
-								pos--;
-								if(pos<=0){
-									pos=0;
-									gotoxy(35,10);
-								}
-								else{
-									gotoxy(35+pos-1,10);
-								}
-							}
-							else{
-							// draw button
-								if(page==1){
-									page=2;
-									gotoxy(35,13);
-									printf("Search");
-									
-								}
-								
-								else{
-								    page=1;
-									gotoxy(45,13);
-									printf("Cancel");
-								}
-							}
-							
-							break;
-
-						case right:
-							if(page==0){
-								pos++;
-								if(pos>=End) {
-									pos=End;
-									gotoxy(35+pos-1,10);
-								}
-								else gotoxy(35+pos,10);
-							}
-							else{
-								// draw button
-								if(page==1){
-									gotoxy(35,13);
-									printf("Search");
-									page=2;
-								}
-								
-								else{
-									page=1;
-									gotoxy(45,13);
-									printf("Cancel");
-								}
-							}
-								break;
-
-						case del:
-						    if(page==0){
-								deleteChar(ptr,pos,End,del);
-								pos=pos-1;
-								if(pos<0) pos=0;
-								End=End-1;
-								if(End<0) End=0;
-							}								
-						    break;
-								
-						case up:
-								page=0;
-								gotoxy(35+pos,10);
-								break;
-
-					    case down:
-								page=1;
-						        gotoxy(35,13);
-								textattr(highlight);
-								printf("Search");  
-						        break;
-					}
-					break;
-				default:
-					if(page==0){
-						checkPrint=isprint(key);
-						if(checkPrint && End<=15){
-							*(ptr+pos)=key;
-							if(pos!=0){
-								gotoxy(35+pos,10);
-							}
-							cprintf("%c",key);
-							gotoxy(35+pos,10);
-							pos++;
-							End++;
-						}
-						else{
-							if(pos==End){
-								End=End+1;
-								pos=pos+1;
-							}
-							terminate=1;
-							break;
-						}
-
-					}
-				}
-		if(End>15) {
-		    stop=enter;
-			//getch();
-		}
-		/* else{
-			gotoxy(1+pos-1,1) ;
-		} */
-		flushall();
-	}while(!terminate);
-
-}
-
-void deleteChar(char *pt,int pos,int size, int button){
-		int i;
-		printf("\n%d,%d",pos,size);
-		if(pos>0){
-		if(button==del){
-				if(pos==size){
-					*(pt+pos)='\0' ;
-					*(pt+pos+1)='\0' ;
-					gotoxy(35+pos-1,10);
-					cprintf("%c",'\0');
-				    gotoxy(35+pos-2,10);
-				}
-				else{
-				for(i=pos-1;i<size;i++) {
-					*(pt+i)=*(pt+i+1);
-					*(pt+i+1)='\0';
-					gotoxy(35+i,10);
-					cprintf("%c",*(pt+i));
-					//if(i==0) gotoxy(1,1);
-					//else gotoxy(1+i-1,1);
-					
-				}
-				}
-		}
-		else{
-			for(i=pos;i<size-1;i++) {
-				//printf("\n%d,%d",i,size-1);
-				*(pt+i)=*(pt+i+1) ;
-				gotoxy(35+i,10);
-				cprintf("%c",*(pt+i));
-				gotoxy(35+i+1,10);
-				cprintf("%c",' ');
-			}
-		}
-		}
-}
-
-//create new node
-struct contact * createNode(void){
-	return (struct contact *)malloc(sizeof(struct contact));
-}
-
-// add struct 
-void append (struct contact *ele){
-	if(head==NULL){
-		head=tail=ele;
-		ele->prev=NULL;
-		ele->next=NULL;
-	}
-	else{
-		ele->prev=tail;
-		tail->next=ele;
-		tail=ele;
-		ele->next=NULL;
-	}
-}
-
-// read from file
-void ReadFile(char szInputfile[25]){
-
-	FILE *pfile_input;
-	char szBuffer[100];
-
-	char * pTemp;
-
-
-/* if( argc != 2 )
-{
-
-printf("No database file specify");
-exit(0);
-
-}
-else
-{
-sprintf( szInputfile, "%s", argv[1] );
-
-}  */
-
-	/*************************************...
-	open inputfile for reading
-	**************************************... */
-
-	if ((pfile_input = fopen( szInputfile, "r" )) == NULL )
-	{
-		printf("Error, cannot open %s for reading\n", szInputfile);
-		exit(1);
-	}
-
-	/*************************************...
-	Read the data from the inputfile
-	**************************************... */
-
-	while( ( fgets( szBuffer, sizeof(szBuffer), pfile_input )) != NULL )
-	{
-
-		struct contact * record= createNode();
-		//append();
-		pTemp = strtok( szBuffer, "," );
-		strcpy( record->name, pTemp ); 
-
-		pTemp = strtok( NULL, "," ); 
-		strcpy( record->phone, pTemp );
-
-		pTemp = strtok( NULL, "," );
-		strcpy( record->address, pTemp ); 
+		gotoxy(1,1);
+		// getch search word
 		
-		append(record);
-	} 
-
+		
 }
-
-
 //Sara
 void SaveFile(void)
 {
@@ -1125,7 +813,7 @@ endptr=text;
 		  }
 	 }
 }
-void EditRec (void)
+void EditRec(void)
 {
 
 int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
@@ -1244,3 +932,141 @@ endptr=text;
 		  }
 	 }
 }
+void EditRecord (void)
+{
+char EditFeilds[3][16]={"Name","phone","address" };
+int j,step1=0,step2=0;
+char * result;
+int i;
+textattr(normal);
+		clrscr();
+		window(15,5,65,15);
+		for(i=1;i<65;i++)
+		{
+			for(j = 1;j<10; j++)
+			{
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+
+	      for(i=0;i<3;i++)
+	      {
+		gotoxy(12,5+step1);
+		puts(EditFeilds[i]);
+		gotoxy(20,5+step1);
+		textbackground(BLUE);
+		for(j=0;j<22;j++)
+		cprintf(" ");
+		step1+=2;
+		}
+
+		gotoxy(30,9);
+		textattr(hilight) ;
+		cprintf("\n OK ") ;
+
+		for(i=0;i<3;i++)
+		{
+		result=(char *)LineEditor(20,5+step2);
+		if(result[0]=='\0')
+			break;
+		puts(result);
+		step2+=2;
+	       }
+
+}
+
+char* LineEditor(int col,int r)
+{
+int startcol=col,currentcol=col,endcol=col,term=0,index=0,i;
+char key;
+int row=r;
+char *startptr,*currentptr,*endptr;
+char text[50],ch;
+currentptr=text;
+startptr=text;
+endptr=text;
+text[0]='\0';
+
+   while(!term){
+
+	 gotoxy(currentcol,row);
+
+	 key=getch();
+	 flushall();
+		if (key==NULL)
+			key=getch();
+			flushall();
+
+		switch(key){
+
+
+			case right :
+				if(currentcol<41){
+					currentcol++;
+					currentptr++;
+						  }
+			break;
+			case left:
+				if(currentcol>0 && currentcol>startcol)
+				{
+				currentcol--;
+				currentptr--;
+				}
+			break ;
+			case end:
+				currentcol=endcol;
+				currentptr=endptr;
+
+			break;
+			case home:
+				currentcol=startcol;
+				currentptr=startptr;
+
+			break ;
+
+
+				case up :
+				row-=2;
+				if(row>5)
+				row=9;
+			break;
+
+			case down :
+				row+=2;
+				if(row>11)
+				row=5;
+			break;
+
+			case enter:
+			      //	textattr(normal);
+				*endptr='\0';
+				term=1;
+			break ;
+			 case esc :
+				term=1;
+			 break;
+			  default:
+				gotoxy(currentcol,15);
+				*currentptr=key;
+
+			 if(currentcol<41) {
+			 currentcol++;
+			 currentptr++;
+					 }
+			 if(endcol<currentcol)
+				{
+					endcol++;
+					endptr++;
+
+				  }
+			  textattr(hilight);
+				 cprintf("%c",key);
+
+
+
+		  }
+	 }
+   return text;
+	 }

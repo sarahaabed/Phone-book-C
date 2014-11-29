@@ -185,28 +185,29 @@ void menu_file(void)
 									pos=0;
 
 							break;
-/*							case alt_v:
+							case alt_v:
 							case right:
 								textattr(normal);
 								clrscr();
+								draw_header();
 								footer();
 								header(alt_v);
 								break;
-	*/
 							
 							case up :
 								pos--;
 								if(pos<0)
 									pos=3;
 							break;
-
+							/*
 							case alt_f :
 								textattr(normal);
 								clrscr();
 								footer();
-								draw_header();	
+								draw_header();
+				//				terminate = 1;								
 								break;
-
+*/
 							default :
 								continue;
 						}
@@ -223,7 +224,7 @@ void menu_file(void)
 							}
 
 						}
-			}while(1);
+			}while(!terminate);
 
 }
 
@@ -285,6 +286,16 @@ void new_file_window(void)
 								////////////////	
 								if(key==enter)
 									{
+										switch(inner_pos)
+										{
+											case 0 :
+											break;
+											case 1:
+											break;
+											case 2:
+												break;
+											
+										}
 										break;
 									}
 								else if(key==esc)
@@ -298,7 +309,7 @@ void new_file_window(void)
 											inner_pos=0;
 //										break;
 									}
-								else
+								else if(key == NULL)
 									{
 										key=getch();
 										switch(key)
@@ -312,7 +323,7 @@ void new_file_window(void)
 														inner_pos = 0;
 													break;
 													
-												case left :
+											case left :
 													if(inner_pos==2)
 														inner_pos--;
 													else if(inner_pos==1)

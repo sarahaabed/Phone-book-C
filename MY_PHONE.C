@@ -3,14 +3,14 @@
 
 #define esc 		27
 #define enter 		13
-#define up 		72
+#define up 			72
 #define down 		80
 #define home 		71
 #define end 		79
 #define normal 		0x07
 #define highlight 	0x70
-#define hilight         0x70
-#define highlight2    	0x3f
+#define hilight     0x70
+#define highlight2  0x3f
 #define tab 		9
 #define alt_f 		33
 #define alt_s 		31
@@ -20,8 +20,8 @@
 #define f2    		60
 #define right 		77
 #define left 		75
-#define ok               111
-#define cancel           99
+#define ok          111
+#define cancel      99
 #define backspace   8
 
 struct contact{
@@ -50,8 +50,10 @@ void search_by(int by_type);       //heba
 void deleteChar(char *pt,int pos,int size, int button); // heba
 
 void SaveFile(void) ; //sarah
-void OpenFile(void) ; //sarah
+void OpenFile(int found) ; //sarah
 void EditRecord(void); //sarah
+void new_file_window(void);//taher
+void add_record_window(void);
 
 int main(void)
 {
@@ -64,10 +66,12 @@ int main(void)
 	footer();
 	draw_header();
 //Taher
-
+		//add_record_window();
+		//getch();
+		//return;
 //Hala
 do{
-    key=getch();
+	key=getch();
 	if (key == NULL)  //to make header active all the time
 	{
 		key=getch();
@@ -86,7 +90,7 @@ do{
 		else if(key==esc){
 			terminate=1;
 		}
-		
+
 //Heba
 	}while(!terminate); //heba
 
@@ -94,6 +98,9 @@ do{
 
 //	getch();
 	return 0;
+
+
+
 }
 
 void draw_header(void)
@@ -109,6 +116,7 @@ void draw_header(void)
 	cprintf("                                                  ");
 	textattr(normal);
 }
+
 void header(char key)
 {
 	// Handle Alt+f, Alt+v, Alt+s
@@ -130,6 +138,7 @@ void header(char key)
 
 }
 
+
 void footer(void)
 {
 	gotoxy(1,25);
@@ -142,289 +151,323 @@ void footer(void)
 
 //Taher
 
+
 void menu_file(void)
 {
-	char key;
-	char new_file_name[15];
-	int terminate=0;
-	int j = 0 ;
-	int i = 0;
-	int pos=0;					///	to handle the current position of the cursor.
-	char file_menu[4][10]={" new    " , " open   " , " save   " , " exit   "};
-
-						//////////////////draw the main items in the file menu.///////////
-				///initialize the file name by "           ";
-				for(i=0;i<14;i++)
-					new_file_name[i]=' ';
-				new_file_name[14]='\0';
-				gotoxy(1,2);
-				for(i=0;i<4;i++)
-						{
-							if(i==pos)
-									textbackground(YELLOW);
-							gotoxy(1,i+2);
-							cprintf("%s",file_menu[i]);
-							textattr(highlight);
-						}
-				///////////////initilizing new file name//////////////////////
-				do{
-					key = getch();
-					if(key == esc)
-						break;
-					if(key == enter)
-					{
-						switch(pos)
-						{
-							case 0 :					//// means cursor on new
-								textbackground(BLACK);
-								clrscr();
-
-								window(15,5,65,15);
-								textbackground(BLUE);
-								for(i=1;i<65;i++)
-								{
-									for(j = 1;j<10; j++)
-									{
-										gotoxy(i,j);
-										textbackground(BROWN);
-										cprintf("%c" , ' ');
-									}
-								}
-								gotoxy(20,5);
-								textcolor(BLACK);
-								cprintf("Add new PhoneBook");
-
-								gotoxy(3,7);
-								cprintf("file name: ");
-
-
-								window(30,12,50,12);
-								gotoxy(1,1);
-								textbackground(BLUE);
-								for(i=0;i<sizeof(new_file_name);i++)
-									cprintf("%c" , new_file_name[i]);
-
-								break;
-						}
-					}
-					else if(key == NULL)
-						{
-							key = getch();
-
-						///// handle the action
-						//hanlde right and left arrows in future
-						// we are here handling only up and down extended keys and alt_f to exit.
-						// all the key are extended
-
-						switch(key)
-						{
-							case down :
-								pos++;
-								if(pos>3)
-									pos=0;
-
-							break;
-							case alt_v:
-							case right:
-								textattr(normal);
-								clrscr();
-								draw_header();
-								footer();
-								header(alt_v);
-								break;
-							
-	
-							break;
-							case up :
-								pos--;
-								if(pos<0)
-									pos=3;
-							break;
-							/*
-							case alt_f :
-<<<<<<< HEAD
-								textattr(normal);
-								clrscr();
-								footer();
-								draw_header();
-				//				terminate = 1;								
-
-								break;
-*/
-							default :
-								continue;
-						}
-							window(1,2,11,5);
-							textbackground(WHITE);
-
-							for(i=0;i<4;i++)
-							{
-								if(i==pos)
-										textbackground(YELLOW);
-								gotoxy(1,i+1);
-								cprintf("%s",file_menu[i]);
-								textattr(highlight);
-							}
-
-						}
-			}while(!terminate);
-
+   char key;
+   int terminate=0;
+   int i = 0;
+   int pos=0;        ///    to handle the current position of the cursor.
+   char file_menu[4][20]={"   new    " , "   open   " , "   save   " , "   exit   "};
+ 
+                         //////////////////draw the main items in the file menu.///////////
+               clrscr();
+               textattr(normal);
+               footer();
+               draw_header();
+               gotoxy(1,2);
+               ////dy awel marra
+               for(i=0;i<4;i++)
+                       {
+                           if(i==pos)
+                                   textbackground(YELLOW);
+                           gotoxy(1,i+2);
+                           cprintf("%s",file_menu[i]);
+                           textattr(highlight);
+                       }
+                       
+               ///////////////initilizing new file name//////////////////////
+               do{
+                   key = getch();
+                   if(key == esc)
+                       break;
+                   if(key == enter)
+                   {
+                       switch(pos)
+                       {
+                           case 0 :                            //// means cursor on new
+                           textbackground(BLACK);
+                           clrscr();
+                           footer();
+                           draw_header();
+						  // gotoxy(17,7)
+						  // cprintf("add new phonebook");
+                           OpenFile(0);
+						   //new_file_window();
+                           break;
+						   case 1 :
+						   textbackground(BLACK);
+                           clrscr();
+                           footer();
+						   OpenFile(1);
+						   draw_phone_book();
+                           break;
+						   
+						   case 2 :
+							textbackground(BLACK);
+                           clrscr();
+                           footer();
+                           draw_header();
+                           SaveFile();	
+						   break;
+                       
+					   }
+                   }
+                   else if(key == NULL)
+                       {
+                           key = getch();
+ 
+                       ///// handle the action
+                       //hanlde right and left arrows in future
+                       // we are here handling only up and down extended keys and alt_f to exit.
+                       // all the key are extended
+ 
+                       switch(key)
+                       {
+                           case down :
+                               pos++;
+                               if(pos>3)
+                                   pos=0;
+ 
+                           break;
+/*                            case alt_v:
+                           case right:
+                               textattr(normal);
+                               clrscr();
+                               footer();
+                               header(alt_v);
+                               break;
+   */
+                           
+                           case up :
+                               pos--;
+                               if(pos<0)
+                                   pos=3;
+                           break;
+ 
+                           case alt_f :
+                               textattr(normal);
+                               clrscr();
+                               footer();
+                               draw_header();    
+                               break;
+ 
+                           default :
+                               continue;
+                       }
+                           window(1,2,11,5);
+                           textbackground(WHITE);
+ 
+                           for(i=0;i<4;i++)
+                           {
+                               if(i==pos)
+                                       textbackground(YELLOW);
+                               gotoxy(1,i+1);
+                               cprintf("%s",file_menu[i]);
+                               textattr(highlight);
+                           }
+ 
+                       }
+           }while(1);
+ 
 }
 
 void new_file_window(void)
 {
-	int j =0;
-	int inner_pos=1;
-	int i = 0;
-	char key;
-	char new_file_name[15];
-	char window_buttons[3][15]={"             ","    OK    ","  CANCEL  "};
-
-		///initialize the file name by "           ";
-				for(i=0;i<14;i++)
-					new_file_name[i]=' ';
-				new_file_name[14]='\0';
-			
-	
-									
-								
-								/////////////popup window to get the file name
-								
-								window(15,5,65,15);
-								textbackground(BLACK);
-									clrscr();
-								textbackground(BLUE);
-								for(i=1;i<65;i++)
-								{
-									for(j = 1;j<10; j++)
-									{
-										gotoxy(i,j);
-										textbackground(BLUE);
-										cprintf("%c" , ' ');
-									}
-								}
-								gotoxy(20,5);
-								textcolor(BLACK);
-								cprintf("Add new PhoneBook");
-
-								gotoxy(3,7);
-								cprintf("file name: ");
-
-								gotoxy(20,7);
-								textbackground(WHITE);
-								cprintf("%s",window_buttons[0]);	
-
-								gotoxy(15,9);
-								textattr(highlight);
-								cprintf("%s",window_buttons[1]);	
-
-								gotoxy(30,9);
-								textattr(highlight);
-								cprintf("%s",window_buttons[2]);	
-							do
-								{
-												
-								/////////////////
-								key=getch();
-								////////////////	
+   int j =0;
+   int inner_pos=1;
+   int i = 0;
+   char key;
+   char new_file_name[15];
+   char window_buttons[3][15]={"             ","    OK    ","  CANCEL  "};
+ 
+       ///initialize the file name by "           ";
+               for(i=0;i<14;i++)
+                   new_file_name[i]=' ';
+               new_file_name[14]='\0';
+           
+   
+                                   
+                               
+                               /////////////popup window to get the file name
+                               
+                               window(15,5,65,15);
+                               for(i=1;i<65;i++)
+                               {
+                                   for(j = 1;j<10; j++)
+                                   {
+                                       gotoxy(i,j);
+                                       textbackground(BLUE);
+                                       cprintf("%c" , ' ');
+                                   }
+                               }
+                               gotoxy(20,5);
+                               textcolor(BLACK);
+                               cprintf("Add new PhoneBook");
+ 
+                               gotoxy(3,7);
+                               cprintf("file name: ");
+ 
+                               gotoxy(20,7);
+                               textbackground(WHITE);
+                               cprintf("%s",window_buttons[0]);    
+ 
+                               gotoxy(15,9);
+                               textattr(highlight);
+                               cprintf("%s",window_buttons[1]);    
+ 
+                               gotoxy(30,9);
+                               textattr(highlight);
+                               cprintf("%s",window_buttons[2]);    
+                           do
+                               {
+                                               
+                               key=getch();
+ 
 								if(key==enter)
-									{
-										switch(inner_pos)
-										{
-											case 0 :
-											break;
-											case 1:
-											break;
-											case 2:
-												break;
-											
-										}
-										break;
-									}
-								else if(key==esc)
-									{
-										break;
-									}
-								else if (key==tab)
-									{
-										inner_pos++;
-										if(inner_pos>2)
-											inner_pos=0;
-//										break;
-									}
-								else if(key == NULL)
-									{
-										key=getch();
-										switch(key)
-											{
-											case right :
-													if(inner_pos==1)
-														inner_pos++;
-													else if(inner_pos>2)
-														inner_pos=1;
-													else if(inner_pos==0)
-														inner_pos = 0;
-													break;
-													
-											case left :
-													if(inner_pos==2)
-														inner_pos--;
-													else if(inner_pos==1)
-														inner_pos=1;
-													else if(inner_pos==0)
-														inner_pos = 0;
-													break;
-												
-											}
-									}
-									
-									if(inner_pos==0)
-										{
-											gotoxy(20,7);
-											textbackground(WHITE);
-											cprintf("%s",window_buttons[0]);
-											
-											gotoxy(30,9);
-											textattr(highlight);
-											cprintf("%s",window_buttons[2]);
-											gotoxy(15,9);
-											textattr(highlight);
-											cprintf("%s",window_buttons[1]);
-
-											gotoxy(20,7);
-											scanf("%s",new_file_name);
-										}
-
-									if(inner_pos==1)
-										{
-											gotoxy(15,9);
-											textbackground(YELLOW);
-											textcolor(BLACK);
-											cprintf("%s",window_buttons[1]);
-											
-											gotoxy(30,9);
-											textattr(highlight);
-											cprintf("%s",window_buttons[2]);
-
-										}
-
-									if(inner_pos==2)
-										{
-
-											gotoxy(15,9);
-											textattr(highlight);
-											cprintf("%s",window_buttons[1]);
-											
-											gotoxy(30,9);
-											textbackground(YELLOW);
-											textcolor(BLACK);
-											cprintf("%s",window_buttons[2]);
-											
-										}
-									
-							}while(1);
+                                   {
+                                       break;
+                                   }
+                               else if(key==esc)
+                                   {
+                                       break;
+                                   }
+                               else if (key==tab)
+                                   {
+                                       inner_pos++;
+                                       if(inner_pos>2)
+                                           inner_pos=0;
+//                                        break;
+                                   }
+                               else
+                                   {
+                                       key=getch();
+                                       switch(key)
+                                           {
+                                           case right :
+                                                   if(inner_pos==1)
+                                                       inner_pos++;
+                                                   else if(inner_pos>2)
+                                                       inner_pos=1;
+                                                   else if(inner_pos==0)
+                                                       inner_pos = 0;
+                                                   break;
+                                                   
+                                               case left :
+                                                   if(inner_pos==2)
+                                                       inner_pos--;
+                                                   else if(inner_pos==1)
+                                                       inner_pos=1;
+                                                   else if(inner_pos==0)
+                                                       inner_pos = 0;
+                                                   break;
+                                               
+                                           }
+                                   }
+                                   
+                                   if(inner_pos==0)
+                                       {
+                                           gotoxy(20,7);
+                                           textbackground(WHITE);
+                                           cprintf("%s",window_buttons[0]);
+                                           
+                                           gotoxy(30,9);
+                                           textattr(highlight);
+                                           cprintf("%s",window_buttons[2]);
+                                           gotoxy(15,9);
+                                           textattr(highlight);
+                                           cprintf("%s",window_buttons[1]);
+ 
+                                           gotoxy(20,7);
+                                           scanf("%s",new_file_name);
+                                       }
+ 
+                                   if(inner_pos==1)
+                                       {
+                                           gotoxy(15,9);
+                                           textbackground(YELLOW);
+                                           textcolor(BLACK);
+                                           cprintf("%s",window_buttons[1]);
+                                           
+                                           gotoxy(30,9);
+                                           textattr(highlight);
+                                           cprintf("%s",window_buttons[2]);
+ 
+                                       }
+ 
+                                   if(inner_pos==2)
+                                       {
+ 
+                                           gotoxy(15,9);
+                                           textattr(highlight);
+                                           cprintf("%s",window_buttons[1]);
+                                           
+                                           gotoxy(30,9);
+                                           textbackground(YELLOW);
+                                           textcolor(BLACK);
+                                           cprintf("%s",window_buttons[2]);
+                                           
+                                       }
+                                   
+                           }while(1);
 }
+void add_record_window(void)
+{
+	char new_info[3][15];
 
+	int i=0;
+	int 	j =0;
+	char window_buttons[2][20]={"    OK    ","  CANCEL  "};
+	for(j =0 ; j<3; j++)
+		{
+			for(i=0;i<14;i++)
+				new_info[j][i]=' ';
+			new_info[j][14]='\0';
+		}
+		
+   window(15,5,65,15);
+   for(i=1;i<65;i++)
+   {
+	   for(j = 1;j<10; j++)
+	   {
+		   gotoxy(i,j);
+		   textbackground(BLUE);
+		   cprintf("%c" , ' ');
+	   }
+   }
+   
+	gotoxy(25,1);
+	cprintf("add new record");
+	
+	gotoxy(3,3);
+	cprintf("Name");
+	gotoxy(25,3);
+	textbackground(WHITE);
+	cprintf("%s",new_info[0]);   
+
+	gotoxy(3,5);
+	textbackground(BLUE);
+	cprintf("Address");	
+	gotoxy(25,5);
+	textbackground(WHITE);
+	cprintf("%s",new_info[1]);    
+	
+	gotoxy(3,7);
+	textbackground(BLUE);
+	cprintf("Phone");
+	gotoxy(25,7);
+	textbackground(WHITE);
+	cprintf("%s",new_info[2]);    
+
+	gotoxy(15,9);
+	textattr(highlight);
+	cprintf("%s",window_buttons[0]);    
+
+	gotoxy(30,9);
+	textattr(highlight);
+	cprintf("%s",window_buttons[1]);    
+	
+}
 
 //Hala
 
@@ -573,9 +616,10 @@ void phone_book()
 						break;
 					case del:
 						//sure?? func
+						//delete_reco func
 						break;
 					case f2:
-						//edit func
+						//edit func			/sarah
 						break;
 				}
 				break;
@@ -1172,9 +1216,10 @@ void SaveFile(void)
 
 
 }
-void OpenFile(void)
+
+void OpenFile(int found)
 {
-int startcol=17,currentcol=17,endcol=17,term=0,index=0,i;
+int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
 char key;
 char *startptr,*currentptr,*endptr;
 char text[21],ch;
@@ -1205,11 +1250,17 @@ endptr=text;
 
 	textattr(normal);
 	gotoxy(5,7);
-	printf("Open File : ");
+			///////////////////////////////////////
+	if(found == 0)
+			printf("Create New File");
+	
+	else if(found == 1)
+		printf("Open File : ");
+		////////////////////////////////////////////
 	gotoxy(30,9);
 	textattr(hilight) ;
 	cprintf("\n OK ") ;
-
+	
    while(!term){
 
 	 gotoxy(currentcol,7);
@@ -1256,13 +1307,11 @@ endptr=text;
 				textattr(normal);
 				clrscr();
 				*endptr='\0';
-				fp=fopen(text,"r");
-					while((ch =fgetc(fp))!=EOF)
-						printf("%c",ch);
+				fp=fopen(text,"a+");
+					//while((ch =fgetc(fp))!=EOF)
+						//printf("%c",ch);
 
-				fclose(fp);
-
-
+				//fclose(fp);
 				term=1;
 			break ;
 			 case esc :
@@ -1289,7 +1338,16 @@ endptr=text;
 
 		  }
 	 }
+	 if(found == 0)
+	 {
+				textbackground(BLUE);
+				textcolor(WHITE);
+				printf("file created");
+				
+				
+	}
 }
+
 void EditRec (void)
 {
 

@@ -28,6 +28,18 @@
 #define cancel      99
 #define backspace   8
 
+struct contact{
+	char name[15];
+	int phone;
+	char address[20];
+	struct contact * prev;
+	struct contact * next;
+
+};  //heba
+
+//global variable
+struct contact * head , * tail; // heba
+
 void draw_header(void);   //all
 void header(char);        //all
 void footer(void);       //all
@@ -38,11 +50,21 @@ void phone_book();
 
 void menu_search(void);     //heba
 void unshow_search_menu(void);  //heba
-void search_by(void);        //heba
+void search_by_name(void);       //heba
+void search_by_phone(void);       //heba
+void deleteChar(char *pt,int pos,int size, int button); // heba
+struct contact * createNode(void); //heba
+void append (struct contact *ele); //heba
+void ReadFile(char szInputfile[25]); //heba
+void NotFound(void); //heba
+void hide_search_by(void); //heba
+void search_result(char Name[10],int Number); //heba
+void search_result_screen(struct contact * temp);//heba;
+void hide_search_result(void); //heba
 
 void SaveFile(void) ; //sarah
 
-void OpenFile(void) ; //sarah
+void OpenFile(int found) ; //sarah
 void EditRecord(void);//sarah this will call CreatLineEditor 3 times
 char *LineEditor(int col,int row); //sarah
 
@@ -55,6 +77,7 @@ void add_record_window(void);
 int main(void)
 {
 	char key;
+	int terminate=0;
 	textattr(normal);
 	clrscr();
 
@@ -152,121 +175,121 @@ void footer(void)
 void menu_file(void)
 {
    char key;
-   int terminate=0;
+ //  int terminate=0;
    int i = 0;
    int pos=0;        ///    to handle the current position of the cursor.
    char file_menu[4][20]={"   new    " , "   open   " , "   save   " , "   exit   "};
- 
-                         //////////////////draw the main items in the file menu.///////////
-               clrscr();
-               textattr(normal);
-               footer();
-               draw_header();
-               gotoxy(1,2);
-               ////dy awel marra
-               for(i=0;i<4;i++)
-                       {
-                           if(i==pos)
-                                   textbackground(YELLOW);
-                           gotoxy(1,i+2);
-                           cprintf("%s",file_menu[i]);
-                           textattr(highlight);
-                       }
-                       
-               ///////////////initilizing new file name//////////////////////
-               do{
-                   key = getch();
-                   if(key == esc)
-                       break;
-                   if(key == enter)
-                   {
-                       switch(pos)
-                       {
-                           case 0 :                            //// means cursor on new
-                           textbackground(BLACK);
-                           clrscr();
-                           footer();
-                           draw_header();
+
+						 //////////////////draw the main items in the file menu.///////////
+			   clrscr();
+			   textattr(normal);
+			   footer();
+			   draw_header();
+			   gotoxy(1,2);
+			   ////dy awel marra
+			   for(i=0;i<4;i++)
+					   {
+						   if(i==pos)
+								   textbackground(YELLOW);
+						   gotoxy(1,i+2);
+						   cprintf("%s",file_menu[i]);
+						   textattr(highlight);
+					   }
+
+			   ///////////////initilizing new file name//////////////////////
+			   do{
+				   key = getch();
+				   if(key == esc)
+					   break;
+				   if(key == enter)
+				   {
+					   switch(pos)
+					   {
+						   case 0 :                            //// means cursor on new
+						   textbackground(BLACK);
+						   clrscr();
+						   footer();
+						   draw_header();
 						  // gotoxy(17,7)
 						  // cprintf("add new phonebook");
-                           OpenFile(0);
+						   OpenFile(0);
 						   //new_file_window();
-                           break;
+						   break;
 						   case 1 :
 						   textbackground(BLACK);
-                           clrscr();
-                           footer();
+						   clrscr();
+						   footer();
 						   OpenFile(1);
 						   draw_phone_book();
-                           break;
-						   
+						   break;
+
 						   case 2 :
 							textbackground(BLACK);
-                           clrscr();
-                           footer();
-                           draw_header();
-                           SaveFile();	
+						   clrscr();
+						   footer();
+						   draw_header();
+						   SaveFile();
 						   break;
-                       
+
 					   }
-                   }
-                   else if(key == NULL)
-                       {
-                           key = getch();
- 
-                       ///// handle the action
-                       //hanlde right and left arrows in future
-                       // we are here handling only up and down extended keys and alt_f to exit.
-                       // all the key are extended
- 
-                       switch(key)
-                       {
-                           case down :
-                               pos++;
-                               if(pos>3)
-                                   pos=0;
- 
-                           break;
+				   }
+				   else if(key == NULL)
+					   {
+						   key = getch();
+
+					   ///// handle the action
+					   //hanlde right and left arrows in future
+					   // we are here handling only up and down extended keys and alt_f to exit.
+					   // all the key are extended
+
+					   switch(key)
+					   {
+						   case down :
+							   pos++;
+							   if(pos>3)
+								   pos=0;
+
+						   break;
 /*                            case alt_v:
-                           case right:
-                               textattr(normal);
-                               clrscr();
-                               footer();
-                               header(alt_v);
-                               break;
+						   case right:
+							   textattr(normal);
+							   clrscr();
+							   footer();
+							   header(alt_v);
+							   break;
    */
-                           
-                           case up :
-                               pos--;
-                               if(pos<0)
-                                   pos=3;
-                           break;
- 
-                           case alt_f :
-                               textattr(normal);
-                               clrscr();
-                               footer();
-                               draw_header();    
-                               break;
- 
-                           default :
-                               continue;
-                       }
-                           window(1,2,11,5);
-                           textbackground(WHITE);
- 
-                           for(i=0;i<4;i++)
-                           {
-                               if(i==pos)
-                                       textbackground(YELLOW);
-                               gotoxy(1,i+1);
-                               cprintf("%s",file_menu[i]);
-                               textattr(highlight);
-                           }
- 
-                       }
-           }while(1);
- 
+
+						   case up :
+							   pos--;
+							   if(pos<0)
+								   pos=3;
+						   break;
+
+						   case alt_f :
+							   textattr(normal);
+							   clrscr();
+							   footer();
+							   draw_header();
+							   break;
+
+						   default :
+							   continue;
+					   }
+						   window(1,2,11,5);
+						   textbackground(WHITE);
+
+						   for(i=0;i<4;i++)
+						   {
+							   if(i==pos)
+									   textbackground(YELLOW);
+							   gotoxy(1,i+1);
+							   cprintf("%s",file_menu[i]);
+							   textattr(highlight);
+						   }
+
+					   }
+		   }while(1);
+
 }
 
 void new_file_window(void)
@@ -639,13 +662,15 @@ void phone_book()
 
 //Heba
 
+//Heba
+
 void menu_search(void){
 	char search_menu[2][13]={"  by name   ","  by phone  "};
-	int pos=0,i, size=2, page=0;
+	
+	int pos=0,i, size=2 , page;
 	char key;
-	int terminate;
-/* 	window(10,2,19,5);
-	textattr(highlight); */
+	int terminate=0;
+
 	textattr(highlight);
 	flushall();
 	gotoxy(21,2);
@@ -654,9 +679,9 @@ void menu_search(void){
 		//window(1,20,4,30);
 		textbackground(WHITE);
 		for(i=0;i<size;i++)
-		{
+		{ 
 			if(i==pos)
-				textbackground(YELLOW);
+			textbackground(YELLOW);
 			gotoxy(21,i+3);
 			cprintf("%s",search_menu[i]);
 			textattr(highlight);
@@ -671,21 +696,24 @@ void menu_search(void){
 					switch(pos){
 						case 0:
 							unshow_search_menu();
-							search_by();
-							getch();
+							search_by_name();
 							terminate=1;
+							page=0;
 							break;
 
 						case 1:
-							clrscr();
-							printf("\n Display Action Down here \n\n press any key to continuo");
-							getch();
+							unshow_search_menu();
+							search_by_phone();
+							terminate=1;
+							page=0;
 							break;
 						}
 					break;
 
 			case esc:
-				terminate=1;
+				unshow_search_menu();
+				terminate=0;
+				page=0;
 				break;
 
 			case tab:
@@ -702,20 +730,10 @@ void menu_search(void){
 						if(pos<0) pos=2;
 						break;
 
-					/* case PageUp:
-						pos--;
-						if(pos<0) pos=2;
-						break; */
-
 					case down:
 						pos++;
 						if(pos>2) pos=0;
 						break;
-
-					/* case PageDown:
-						pos++;
-						if(pos>2) pos=0;
-						break ; */
 
 					case home:
 						pos=0;
@@ -726,19 +744,16 @@ void menu_search(void){
 						break;
 
 					case alt_f:
-						//menu_view();
 						terminate=1;
 						page=1;
 						break;
 
 					case alt_v:
-						//menu_view();
 						terminate=1;
 						page=2;
 						break;
 
 					case alt_s:
-						//menu_view();
 						terminate=1;
 						page=3;
 						break;
@@ -746,7 +761,7 @@ void menu_search(void){
 				break;
 
 		}
-	}while(terminate!=1);
+	}while(!terminate);
 	if(page==1){
 		unshow_search_menu();
 		menu_file();
@@ -778,39 +793,742 @@ void unshow_search_menu(void){
 		cprintf("            ");
 }
 
-void search_by(void){
-		int i ,j;
-		char Name[10];
+void search_by_name(void){
+		
+		int i,j,checkPrint,stop;
+		int pos=0,terminate=0,End=0,page=0;
+		char name[15],key , search_word;
+		char * ptr;
+		ptr=name;
 
-		window(19,11,60,18);
-		textbackground(BLUE);
-		for(i=1;i<65;i++)
-		{
-			for(j = 1;j<10; j++){
+		for(i=19;i<65;i++){
+			for(j = 7;j<16; j++){
 				gotoxy(i,j);
 				textbackground(BROWN);
 				cprintf("%c" , ' ');
 			}
 		}
-		gotoxy(16,2);
+		gotoxy(35,8);
 		textcolor(BLACK);
 		printf("Search By Name\n");
 
-		gotoxy(10,4);
+		gotoxy(28,10);
 		printf("Name: ");
-
-
-		window(35,14,50,14);
-		gotoxy(1,1);
+		
+		// draw button
+		gotoxy(35,13);
+	    printf("Search");
+		textcolor(BLACK);
+		
+		gotoxy(45,13);
+	    printf("Cancel");
+		textcolor(BLACK);
+	
+	
+		gotoxy(35,10);
 		textbackground(BLUE);
-		for(i=0;i<15;i++){
+		for(i=35;i<51;i++){
 			cprintf("%c" , ' ');
+			gotoxy(i+1,10);
 		}
-		gotoxy(1,1);
-		// getch search word
-		
-		
+		 
+			
+		gotoxy(35,10);
+		//***************** Enter Search Word (Phone , Name)*************************//
+	   do{
+			key=getch();
+			stop=key;
+			switch(stop){
+
+				case backspace:
+					if(page==0){
+						pos--;
+						if(pos<0) pos=0;
+						else{
+							deleteChar(ptr,pos-1,End,backspace);
+							End=End-1;
+						}
+					}
+					break;
+				
+				case esc :
+					terminate=1;
+					break;
+					
+				case enter:
+					if(page==2){
+						// read from file
+						ReadFile("Heba.txt");
+						if(head==NULL){
+							hide_search_by();
+							NotFound();
+						}
+						else{
+							hide_search_by();
+							for(i=End;i<15;i++){
+								name[End]='\0';
+							}
+						    search_result(name,0);						
+						}
+						terminate=1;
+					}
+					else if (page==1){
+						hide_search_by();
+					}
+					break;
+
+				case NULL:
+					stop=getch();
+					switch(stop){
+						case esc:
+							terminate=1;
+							break;
+
+						case home:
+						   if(page==0){
+								pos=0;
+								gotoxy(35+pos,10);	
+							}
+							break;
+
+						case end:
+							if(page==0){
+								pos=end;
+								gotoxy(35+pos,10);
+							}
+							break;
+							
+						case left:
+							if(page==0){
+								pos--;
+								if(pos<=0){
+									pos=0;
+									gotoxy(35,10);
+								}
+								else{
+									gotoxy(35+pos-1,10);
+								}
+							}
+							else{
+							// draw button
+								if(page==1){
+									page=2;
+									gotoxy(35,13);
+									printf("Search");
+									
+								}
+								
+								else{
+								    page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+							
+							break;
+
+						case right:
+							if(page==0){
+								pos++;
+								if(pos>=End) {
+									pos=End;
+									gotoxy(35+pos-1,10);
+								}
+								else gotoxy(35+pos,10);
+							}
+							else{
+								// draw button
+								if(page==1){
+									gotoxy(35,13);
+									printf("Search");
+									page=2;
+								}
+								
+								else{
+									page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+								break;
+
+						case del:
+						    if(page==0){
+								deleteChar(ptr,pos,End,del);
+								pos=pos-1;
+								if(pos<0) pos=0;
+								End=End-1;
+								if(End<0) End=0;
+							}								
+						    break;
+								
+						case up:
+								page=0;
+								gotoxy(35+pos,10);
+								break;
+
+					    case down:
+								page=2;
+						        gotoxy(35,13);
+								textattr(highlight);
+								printf("Search");  
+						        break;
+					}
+					break;
+				default:
+					if(page==0){
+						checkPrint=isprint(key);
+						if(checkPrint && End<=15){
+							*(ptr+pos)=key;
+							if(pos!=0){
+								gotoxy(35+pos,10);
+							}
+							cprintf("%c",key);
+							gotoxy(35+pos,10);
+							pos++;
+							End++;
+						}
+						else{
+							if(pos==End){
+								End=End+1;
+								pos=pos+1;
+							}
+							terminate=1;
+							break;
+						}
+
+					}
+				}
+		if(End>15) {
+		    stop=enter;
+			//getch();
+		}
+		/* else{
+			gotoxy(1+pos-1,1) ;
+		} */
+		flushall();
+	}while(!terminate);
+
 }
+
+
+void search_by_phone(void){
+
+		int i,j,checkPrint,stop;
+		int pos=0,terminate=0,End=0,page=0;
+		char number[10],key;
+		char * ptr;
+		ptr=number;
+
+		for(i=19;i<65;i++){
+			for(j = 7;j<16; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(35,8);
+		textcolor(BLACK);
+		printf("Search By Name\n");
+
+		gotoxy(28,10);
+		printf("Phone: ");
+
+		
+		gotoxy(35,10);
+		textbackground(BLUE);
+		for(i=35;i<51;i++){
+			cprintf("%c" , ' ');
+			gotoxy(i+1,10);
+		}
+		
+		
+		// draw button
+		gotoxy(35,13);
+		printf("Search");
+		textcolor(BLACK);
+
+		gotoxy(45,13);
+		printf("Cancel");
+		textcolor(BLACK);
+
+		gotoxy(35,10);
+		//***************** Enter Search Word (Phone , Name)*************************//
+	   do{
+			key=getch();
+			stop=key;
+			switch(stop){
+
+				case backspace:
+					if(page==0){
+						pos--;
+						if(pos<0) pos=0;
+						else{
+							deleteChar(ptr,pos-1,End,backspace);
+							End=End-1;
+						}
+					}
+					break;
+				
+				case esc :
+					terminate=1;
+					break;
+					
+				case enter:
+					if(page==2){
+						// read from file
+						ReadFile("Heba.txt");
+						if(head==NULL){
+							hide_search_by();
+							NotFound();
+						}
+						else{
+							hide_search_by();
+						    search_result("o",atoi(number));						
+						}
+					}
+					else if (page==1){
+						hide_search_by();
+					}
+					terminate=1;
+					break;
+
+				case NULL:
+					stop=getch();
+					switch(stop){
+						case esc:
+							terminate=1;
+							break;
+
+						case home:
+						   if(page==0){
+								pos=0;
+								gotoxy(35+pos,10);	
+							}
+							break;
+
+						case end:
+							if(page==0){
+								pos=end;
+								gotoxy(35+pos,10);
+							}
+							break;
+							
+						case left:
+							if(page==0){
+								pos--;
+								if(pos<=0){
+									pos=0;
+									gotoxy(35,10);
+								}
+								else{
+									gotoxy(35+pos-1,10);
+								}
+							}
+							else{
+							// draw button
+								if(page==1){
+									page=2;
+									gotoxy(35,13);
+									printf("Search");
+									
+								}
+								
+								else{
+								    page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+							
+							break;
+
+						case right:
+							if(page==0){
+								pos++;
+								if(pos>=End) {
+									pos=End;
+									gotoxy(35+pos-1,10);
+								}
+								else gotoxy(35+pos,10);
+							}
+							else{
+								// draw button
+								if(page==1){
+									gotoxy(35,13);
+									printf("Search");
+									page=2;
+								}
+								
+								else{
+									page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+								break;
+
+						case del:
+						    if(page==0){
+								deleteChar(ptr,pos,End,del);
+								pos=pos-1;
+								if(pos<0) pos=0;
+								End=End-1;
+								if(End<0) End=0;
+							}								
+						    break;
+								
+						case up:
+								page=0;
+								gotoxy(35+pos,10);
+								break;
+
+					    case down:
+								page=2;
+						        gotoxy(35,13);
+								textattr(highlight);
+								printf("Search");  
+						        break;
+					}
+					break;
+				default:
+					if(page==0){
+						checkPrint=isprint(key);
+						if(checkPrint && End<=15 && isdigit(key)){
+							*(ptr+pos)=key;
+							if(pos!=0){
+								gotoxy(35+pos,10);
+							}
+							cprintf("%c",key);
+							gotoxy(35+pos,10);
+							pos++;
+							End++;
+						}
+						else{
+							if(pos==End){
+								End=End+1;
+								pos=pos+1;
+							}
+							terminate=1;
+							break;
+						}
+
+					}
+				}
+		if(End>15) {
+		    stop=enter;
+			//getch();
+		}
+		/* else{
+			gotoxy(1+pos-1,1) ;
+		} */
+		flushall();
+	}while(!terminate);
+}
+
+void deleteChar(char *pt,int pos,int size, int button){
+		int i;
+		printf("\n%d,%d",pos,size);
+		if(pos>0){
+		if(button==del){
+				if(pos==size){
+					*(pt+pos)='\0' ;
+					*(pt+pos+1)='\0' ;
+					gotoxy(35+pos-1,10);
+					cprintf("%c",'\0');
+				    gotoxy(35+pos-2,10);
+				}
+				else{
+				for(i=pos-1;i<size;i++) {
+					*(pt+i)=*(pt+i+1);
+					*(pt+i+1)='\0';
+					gotoxy(35+i,10);
+					cprintf("%c",*(pt+i));
+					//if(i==0) gotoxy(1,1);
+					//else gotoxy(1+i-1,1);
+					
+				}
+				}
+		}
+		else{
+			for(i=pos;i<size-1;i++) {
+				//printf("\n%d,%d",i,size-1);
+				*(pt+i)=*(pt+i+1) ;
+				gotoxy(35+i,10);
+				cprintf("%c",*(pt+i));
+				gotoxy(35+i+1,10);
+				cprintf("%c",' ');
+			}
+		}
+		}
+}
+
+//create new node
+struct contact * createNode(void){
+	return (struct contact *)malloc(sizeof(struct contact));
+}
+
+// add struct 
+void append (struct contact *ele){
+	if(head==NULL){
+		head=tail=ele;
+		ele->prev=NULL;
+		ele->next=NULL;
+	}
+	else{
+		ele->prev=tail;
+		tail->next=ele;
+		tail=ele;
+		ele->next=NULL;
+	}
+}
+
+// read from file
+void ReadFile(char szInputfile[25]){
+
+	FILE *pfile_input;
+	char szBuffer[100];
+
+	char * pTemp;
+
+
+/* if( argc != 2 )
+{
+
+printf("No database file specify");
+exit(0);
+
+}
+else
+{
+sprintf( szInputfile, "%s", argv[1] );
+
+}  */
+
+	/*************************************...
+	open inputfile for reading
+	**************************************... */
+
+	if ((pfile_input = fopen( szInputfile, "r" )) == NULL )
+	{
+		printf("Error, cannot open %s for reading\n", szInputfile);
+		exit(1);
+	}
+
+	/*************************************...
+	Read the data from the inputfile
+	**************************************... */
+
+	while( ( fgets( szBuffer, sizeof(szBuffer), pfile_input )) != NULL )
+	{
+
+		struct contact * record= createNode();
+		//append();
+		char num [15];
+		pTemp = strtok( szBuffer, "," );
+		strcpy( record->name, pTemp ); 
+
+		pTemp = strtok( NULL, "," ); 
+		strcpy( num, pTemp );
+		record->phone=atoi(num);
+		
+		pTemp = strtok( NULL, "," );
+		strcpy( record->address, pTemp ); 
+		
+		append(record);
+	} 
+
+}
+
+// not found Screen
+void NotFound(void){
+		int i,j;
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(32,12);
+		textcolor(BLACK);
+		printf("Contact is Not Found\n");
+
+		// draw button
+		gotoxy(38,14);
+		printf("Cancel");
+		textcolor(BLACK);
+
+		gotoxy(38,14);
+		getch();
+		
+		//hide screen
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textbackground(highlight);
+				cprintf("%c" , ' ');
+			}
+		}
+}
+
+void hide_search_by(void){
+			int i,j;
+			for(i=19;i<65;i++){
+				for(j=7;j<16; j++){
+					gotoxy(i,j);
+					textbackground(highlight);
+					cprintf("%c" , ' ');
+				}
+			}
+}
+
+ void search_result(char Name[15],int Number){
+
+	struct contact * temp=head;
+	int pos=3;
+	char key;
+	int i;
+		if(Number!=0){
+			while(temp!=NULL && temp->phone!=Number){
+				temp=temp->next;
+			}
+		}
+		else{
+			while((temp!=NULL && strcmp(temp->name,Name))){
+				temp=temp->next;
+			}
+		}
+		if(temp==NULL){
+			hide_search_result();
+			NotFound();
+		}
+		else{
+			search_result_screen(temp);
+			temp=temp->next;
+			do{
+			flushall();
+			key=getch();
+			switch(key){
+				case enter:
+					// next button
+					if(pos==3){
+						if(Number!=0){
+							while(temp!=NULL && temp->phone!=Number){
+								temp=temp->next;
+							}
+						}
+						else{
+							while((temp!=NULL && strcmp(temp->name,Name))){
+								temp=temp->next;
+							}
+						}
+
+						if(temp!=NULL){
+							search_result_screen(temp);
+							temp=temp->next;
+						}
+						else{
+							hide_search_result();
+						}
+					}
+					break;
+					//remove button
+				   //	else if(pos==2){
+
+				   //	}
+					// edit button
+				   //	else if(pos==1){
+
+				  //	}
+				case esc:
+					hide_search_result();
+					temp=NULL;
+
+				case right:
+					pos--;
+					if(pos<1) pos=3;
+					if(pos==3) gotoxy(50,16);
+					else if (pos==2) gotoxy(38,16);
+					else if (pos==1) gotoxy(28,16);
+					break;
+
+				case left:
+					pos++;
+					if(pos>3) pos=1;
+					if(pos==3) gotoxy(50,16);
+					else if (pos==2) gotoxy(38,16);
+					else if (pos==1) gotoxy(28,16);
+					break;
+
+			}
+		}
+		while(temp!=NULL);
+		hide_search_result();
+		}
+	//}
+
+}
+
+void search_result_screen(struct contact * temp){
+		int i,j , pos , terminate;
+		char key;
+		for(i=19;i<65;i++){
+			for(j=7;j<17; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		
+		gotoxy(36,8);
+		textcolor(BLACK);
+		printf("Search Result\n");
+
+	    gotoxy(28,10);
+		printf("Name: ");
+		gotoxy(35,10);
+		printf("%s",temp->name);
+		
+		gotoxy(28,12);
+		printf("Phone: ");
+		gotoxy(35,12);
+		printf("%d",temp->phone);
+		
+		gotoxy(28,14);
+		printf("Address: ");
+		gotoxy(37,14);
+		printf("%s",temp->address);
+		
+		// draw button
+		gotoxy(28,16);
+	    printf("Edit");
+		textcolor(BLACK);
+		
+		gotoxy(38,16);
+	    printf("Remove");
+		textcolor(BLACK);
+		
+		gotoxy(50,16);
+	    printf("Next");
+		textcolor(BLACK);
+		
+		gotoxy(50,16);
+	
+}
+
+void hide_search_result(void){
+		int i,j;
+		for(i=19;i<65;i++){
+			for(j=5;j<17; j++){
+				gotoxy(i,j);
+				textbackground(highlight);
+				cprintf("%c" , ' ');
+			}
+		}
+}
+
+
 //Sara
 void SaveFile(void)
 {
@@ -926,7 +1644,8 @@ void SaveFile(void)
 
 void OpenFile(int found)
 {
-int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
+int startcol=20,currentcol=20,endcol=20,term=0,i;
+//int index=0;
 char key;
 char *startptr,*currentptr,*endptr;
 char text[21],ch;
@@ -960,14 +1679,14 @@ endptr=text;
 			///////////////////////////////////////
 	if(found == 0)
 			printf("Create New File");
-	
+
 	else if(found == 1)
 		printf("Open File : ");
 		////////////////////////////////////////////
 	gotoxy(30,9);
 	textattr(hilight) ;
 	cprintf("\n OK ") ;
-	
+
    while(!term){
 
 	 gotoxy(currentcol,7);
@@ -1004,11 +1723,11 @@ endptr=text;
 
 			case up :
 				continue;
-			break;
+			//break;
 
 			case down :
 				continue;
-			break;
+		   //	break;
 
 			case enter:
 				textattr(normal);
@@ -1060,7 +1779,8 @@ void EditRec (void)
 
 {
 
-int startcol=20,currentcol=20,endcol=20,term=0,index=0,i;
+int startcol=20,currentcol=20,endcol=20,term=0,i;
+//int index=0;
 char key;
 char *startptr,*currentptr,*endptr;
 char EditFeilds[3][16]={"Name","phone","address"},text[21];
@@ -1224,7 +1944,8 @@ textattr(normal);
 
 char* LineEditor(int col,int r)
 {
-int startcol=col,currentcol=col,endcol=col,term=0,index=0,i;
+int startcol=col,currentcol=col,endcol=col,term=0,i;
+//int index=0;
 char key;
 int row=r;
 char *startptr,*currentptr,*endptr;

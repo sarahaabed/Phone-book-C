@@ -22,9 +22,9 @@
 #define right 		77
 #define left 		75
 
-#define ok               111
-#define cancel           99
-#define backspace   8
+#define ok              111
+#define cancel          99
+#define backspace   	8
 
 struct contact{
 	char name[15];
@@ -37,6 +37,7 @@ struct contact{
 
 //global variable
 struct contact * head , * tail; 					// heba
+char* file_name;
 
 //functions prototypes
 void draw_header(void);   							//all
@@ -50,7 +51,7 @@ char* line_editor(int,int,char, char*); 			//hala
 void draw_phone_book(void);//char*);  				//hala
 void phone_book(char*);								//hala
 
-
+void save_file(char *);
 
 int ReadFile(char* szInputfile); 					//heba
 struct contact * createNode(void); 					//heba
@@ -62,27 +63,12 @@ void NotFound(void);                                //heba
 void search_result(char Name[10],int Number);       //heba
 void search_result_screen(struct contact * temp);   //heba
 void deleteChar(char *pt,int pos,int size, int button); //heba
+
 /*
-
-//void unshow_search_menu(void);  //heba
-void deleteChar(char *pt,int pos,int size, int button); // heba
-void NotFound(void); //heba
-void search_by_name(void);       //heba
-void search_by_phone(void);       //heba
-void hide_search_by(void); //heba
-void search_result(char Name[10],int Number); //heba
-void search_result_screen(struct contact * temp);//heba;
-void hide_search_result(void); //heba
-
-void SaveFile(void) ; //sarah
-
 
 void EditRecord(void);//sarah this will call CreatLineEditor 3 times
 //char *LineEditor(int col,int row); //sarah
-
-void OpenFile(int found) ; //sarah
 void EditRecord(void); //sarah
-
 void add_record_window(void);
 */
 
@@ -180,13 +166,16 @@ void footer(void)        //done
 void menu_file(void)      //done
 {
 	char key;
+	
    	int pos=0,i, stop=0, size=4;
    	char file_menu[4][20]={"   New    " , "   Open   " , "   Save   " , "   Exit   "};
 	flushall();
 	
+	//file_name=(char*)malloc(21*sizeof(char));
+	
 	textattr(normal);
-	clrscr();
-	footer();
+	//clrscr();
+	//footer();
 	draw_header();
 	
 	textattr(highlight);
@@ -265,6 +254,9 @@ void menu_file(void)      //done
 						footer();
 						draw_header();
 						open_file_window(0);
+						//clrscr();
+						//printf("ba3d open %s",file_name);
+						//getch();
 						//phone_book(file_name);
 						//ReadFile(file_name);
 						stop=1;
@@ -274,7 +266,11 @@ void menu_file(void)      //done
 						clrscr();
 						footer();
 						draw_header();
-						//SaveFile();
+						//open_file_window(0,file_name);
+						//clrscr();
+						//printf("2abl manady %s",file_name);
+						//getch();
+						save_file(file_name);
 						stop=1;
 						break;
 					case 3:
@@ -292,19 +288,44 @@ void menu_file(void)      //done
 	}while(!stop);
 }
 
+void save_file(char * file_name)		//done
+{
+	struct contact * temp;
+	FILE * pfile_out;
+	temp = head;
+	
+	//clrscr();
+	//printf("gowa save %s",file_name);
+	//getch();
+	if ((pfile_out = fopen( file_name, "w" )) == NULL )
+   {
+       printf("Error, cannot open %s\n", file_name);
+		getch();
+	   exit(1);
+   }
+	else
+	{
+		while(temp != NULL)
+		{
+			fprintf(pfile_out,"%s,%d,%s", temp->name , temp->phone,temp->address);
+			temp=temp->next;
+		}
+		fclose(pfile_out);
+	}
+}
+
 void open_file_window(int create)   //done
 {
 	int size=2,stop=0;
    	int pos=-1;
    	int i = 0;
    	char key;
-   	char* file_name;
+   
    	char window_buttons[2][15]={"   OK    ","  CANCEL  "};         
    	FILE* fb;
                                                
 	// new_file_name = "test file name";
 	 ////////   
-	file_name=(char*)malloc(21*sizeof(char));
 	     
 	textattr(normal);
 	clrscr();
@@ -396,6 +417,7 @@ void open_file_window(int create)   //done
 								textattr(normal);
 								clrscr();
 								draw_header();
+								//ReadFile(file_name);
 								phone_book(file_name);
 								stop=1;							
 							}
@@ -443,12 +465,16 @@ void open_file_window(int create)   //done
 			default:
 				if (isprint(key))
 				{
-					line_editor(15,6,key,file_name);
+					file_name=line_editor(15,6,key,file_name);
 					pos++;
 				} 
 		}
 	}while(!stop);
 	//free(file_name);
+	//clrscr();
+	//printf("return   %s",file_name);
+	//getch();
+	//return file_name;
 }
 
 //Hala
@@ -581,18 +607,19 @@ void draw_phone_book(void)//char* file)       	//done
 	textattr(normal);
 }
 
-void phone_book(char* file_name)								//done
+void phone_book(char* file_name)				//done
 {
 	int pos=0, stop=0, i=0;
 	char key;
 	int size;  //number of records in phone book
 	struct contact* curr_contact;
 	
-	curr_contact=head;
+	
 
 	size=ReadFile(file_name);
 
 	do{
+		curr_contact=head;
 		clrscr();
 		footer();
 		draw_header();
@@ -636,7 +663,7 @@ void phone_book(char* file_name)								//done
 							curr_contact=tail;
 	 					else
 						{
-							while(i<=pos)
+							while(i<pos)
 							{
 								curr_contact=curr_contact->next;
 								i++;
@@ -662,15 +689,13 @@ void phone_book(char* file_name)								//done
 			case esc:
 				stop=1;
 				break;
-		}
-	
-		
+		}		
 	}while(!stop);
+	//return file_name;
 }
-
 //Heba
 
-void menu_search(void) {   //done{
+void menu_search(void) {   						//done
 	char search_menu[2][13]={"  by name   ","  by phone  "};
 	
 	int pos=0,i, size=2;
@@ -791,7 +816,7 @@ void menu_search(void) {   //done{
 	
 }
 
-void search_by(int search_type){
+void search_by(int search_type){				//done
 		
 		int i,j,checkPrint,stop;
 		int pos=0,terminate=0,End=0,page=0;
@@ -1056,7 +1081,7 @@ void search_by(int search_type){
 }
 
 // not found Screen
-void NotFound(void){
+void NotFound(void){							//done
 		int i,j;
 		for(i=23;i<60;i++){
 			for(j = 9;j<16; j++){
@@ -1088,13 +1113,13 @@ void NotFound(void){
 }
 
 //create new node
-struct contact * createNode(void)
+struct contact * createNode(void)				//done
 {
    return (struct contact *)malloc(sizeof(struct contact));
 }
  
 // add struct 
-void append (struct contact *ele)
+void append (struct contact *ele)					//done
 {
    if(head==NULL){
        head=tail=ele;
@@ -1110,27 +1135,13 @@ void append (struct contact *ele)
 }                  
  
 // read from file
-int ReadFile(char* szInputfile)
+int ReadFile(char* szInputfile)						//done
 {
  
    	FILE *pfile_input;
    	char szBuffer[100];
 	int  records_num=0;
    	char * pTemp;
- 
- 	//open_file_window(0);
-/* if( argc != 2 )
-{
- 
-printf("No database file specify");
-exit(0);
- 
-}
-else
-{
-sprintf( szInputfile, "%s", argv[1] );
- 
-}  */
  
    /*************************************...
    open inputfile for reading
@@ -1165,10 +1176,12 @@ sprintf( szInputfile, "%s", argv[1] );
        append(record);
        records_num++;
    }  
+   
+	fclose(pfile_input);
    return records_num;
 }
 
-void display(int records_num, int pos)
+void display(int records_num, int pos)				//done
 {
 	struct contact *temp;
     int x=4,y=4, i=0;
@@ -1192,7 +1205,7 @@ void display(int records_num, int pos)
     } 
 }
 
-void delete_contact(struct contact * temp)
+void delete_contact(struct contact * temp)			//done
 {
 		//struct contact *ee;
 		if (temp==head && head==tail){
@@ -1209,7 +1222,7 @@ void delete_contact(struct contact * temp)
 			tail->next=NULL;
 			free(temp);
 		}
-		else if (head!=tail && temp!=tail && temp!=head){
+		else {
 			temp->prev->next=temp->next;
 			temp->next->prev=temp->prev;
 			free(temp);
@@ -1229,7 +1242,7 @@ void delete_contact(struct contact * temp)
 }
 
 // search processing
-void search_result(char Name[15],int Number){
+void search_result(char Name[15],int Number){		//done
 
 	struct contact * temp=head;
 	int pos=3;
@@ -1333,7 +1346,7 @@ void search_result(char Name[15],int Number){
 	}
 
 // search result screen
-void search_result_screen(struct contact * temp){
+void search_result_screen(struct contact * temp){		//done
 		int i,j , pos , terminate;
 		char key;
 		for(i=19;i<65;i++){
@@ -1380,7 +1393,7 @@ void search_result_screen(struct contact * temp){
 	
 }
 
-void deleteChar(char *pt,int pos,int size, int button){
+void deleteChar(char *pt,int pos,int size, int button){			//done
 		int i;
 		printf("\n%d,%d",pos,size);
 		if(pos>0){
@@ -1477,17 +1490,11 @@ char* line_editor(int col,int row, char key, char* arr)  //almost done
 			
 			case tab:
 			case esc:
+			case enter:			
 				*p_last='\0';
 				 //return arr;
 				 stop=1;
 				 break;
-			/*case enter:
-				*(p_last)='\0';
-				//p_last=p_start+20;
-				gotoxy(strt_column,12);
-				puts(arr);
-				stop=1;
-				break;*/
 			default:
 				if (counter == max_chars_num && cur_column>=end_column)
 					 {p_current=p_last;}
@@ -1511,9 +1518,6 @@ char* line_editor(int col,int row, char key, char* arr)  //almost done
 				key=getch();
 				break;
 		}
-		
-		
 	}while(!stop);
 	return arr;
-
 }

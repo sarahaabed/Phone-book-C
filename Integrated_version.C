@@ -215,10 +215,16 @@ void menu_file(void)      //done
 						break;
 					case alt_v:
 					case right:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_view();
 						stop=1;
 						break;
 					case alt_s:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_search();
 						stop=1;
 						break;
@@ -487,8 +493,8 @@ void menu_view(void)   						  	//done
 	flushall();
 	
 	textattr(normal);
-	clrscr();
-	footer();
+	//clrscr();
+	//footer();
 	draw_header();
 	
 	textattr(highlight);
@@ -528,11 +534,17 @@ void menu_view(void)   						  	//done
 						break;
 					case alt_f:
 					case left:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_file();
 						stop=1;								//// go to the file menu
 						break;
 					case alt_s:
 					case right:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_search();
 						stop=1;
 						break;
@@ -614,8 +626,6 @@ void phone_book(char* file_name)				//done
 	int size;  //number of records in phone book
 	struct contact* curr_contact;
 	
-	
-
 	size=ReadFile(file_name);
 
 	do{
@@ -703,8 +713,8 @@ void menu_search(void) {   						//done
 	int terminate=0;
 	
 	textattr(normal);
-	clrscr();
-	footer();
+	//clrscr();
+	//footer();
 	draw_header();
 
 	textattr(highlight);
@@ -783,12 +793,18 @@ void menu_search(void) {   						//done
 						break;
 
 					case alt_f:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_file();
 						terminate=1;
 						break;
 
 					case alt_v:
 					case left:
+						textattr(normal);
+						clrscr();
+						footer();
 						menu_view();
 						terminate=1;
 						break;
@@ -827,7 +843,7 @@ void search_by(int search_type){				//done
 		for(i=19;i<65;i++){
 			for(j = 7;j<16; j++){
 				gotoxy(i,j);
-				textbackground(BROWN);
+				textattr(highlight2);
 				cprintf("%c" , ' ');
 			}
 		}
@@ -1086,7 +1102,7 @@ void NotFound(void){							//done
 		for(i=23;i<60;i++){
 			for(j = 9;j<16; j++){
 				gotoxy(i,j);
-				textbackground(BROWN);
+				textattr(highlight2);
 				cprintf("%c" , ' ');
 			}
 		}
@@ -1352,7 +1368,7 @@ void search_result_screen(struct contact * temp){		//done
 		for(i=19;i<65;i++){
 			for(j=7;j<17; j++){
 				gotoxy(i,j);
-				textbackground(BROWN);
+				textattr(highlight2);
 				cprintf("%c" , ' ');
 			}
 		}

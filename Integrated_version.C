@@ -56,9 +56,12 @@ int ReadFile(char* szInputfile); 					//heba
 struct contact * createNode(void); 					//heba
 void append (struct contact *ele); 					//heba
 void display(int,int);								//hala
-
 void delete_contact(struct contact * temp); 		//heba
-
+void search_by(int search_type);                    //heba
+void NotFound(void);                                //heba
+void search_result(char Name[10],int Number);       //heba
+void search_result_screen(struct contact * temp);   //heba
+void deleteChar(char *pt,int pos,int size, int button); //heba
 /*
 
 //void unshow_search_menu(void);  //heba
@@ -667,8 +670,7 @@ void phone_book(char* file_name)								//done
 
 //Heba
 
-void menu_search(void)    //done
-{
+void menu_search(void) {   //done{
 	char search_menu[2][13]={"  by name   ","  by phone  "};
 	
 	int pos=0,i, size=2;
@@ -706,13 +708,23 @@ void menu_search(void)    //done
 					{
 						case 0:
 							
-							//search_by_name();
+							//search by name 
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							search_by(1);
 							terminate=1;
 							break;
 
 						case 1:
 				
-							//search_by_phone();
+							//search by phone
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							search_by(2);
 							terminate=1;
 							break;
 					}
@@ -777,6 +789,302 @@ void menu_search(void)    //done
 		}
 	}while(!terminate);
 	
+}
+
+void search_by(int search_type){
+		
+		int i,j,checkPrint,stop;
+		int pos=0,terminate=0,End=0,page=0;
+		char name[15],key , search_word;
+		char * ptr;
+		ptr=name;
+
+		for(i=19;i<65;i++){
+			for(j = 7;j<16; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(35,8);
+		textcolor(BLACK);
+		
+		if(search_type==1){
+			printf("Search By Name\n");
+			gotoxy(28,10);
+			printf("Name: ");
+		}
+		else if(search_type==2){
+			printf("Search By Phone\n");
+			gotoxy(28,10);
+			printf("Phone: ");
+		}
+		
+		// draw button
+		gotoxy(35,13);
+	    printf("Search");
+		textcolor(BLACK);
+		
+		gotoxy(45,13);
+	    printf("Cancel");
+		textcolor(BLACK);
+	
+	
+		gotoxy(35,10);
+		textbackground(BLUE);
+		for(i=35;i<51;i++){
+			cprintf("%c" , ' ');
+			gotoxy(i+1,10);
+		}
+		 
+			
+		gotoxy(35,10);
+		//***************** Enter Search Word (Phone , Name)*************************//
+	   do{
+			key=getch();
+			stop=key;
+			switch(stop){
+
+				case backspace:
+					if(page==0){
+						pos--;
+						if(pos<0) pos=0;
+						else{
+							deleteChar(ptr,pos-1,End,backspace);
+							End=End-1;
+						}
+					}
+					break;
+				
+				case esc :
+					terminate=1;
+					break;
+					
+				case enter:
+					if(page==2){
+						// read from file
+					   //	display();
+						if(head==NULL){
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							NotFound();
+						}
+						else{
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							for(i=End;i<15;i++){
+								name[End]='\0';
+							}
+							// search by name
+							if(search_type==1){
+								search_result(name,0);	
+							}
+							// search by phone
+							else if(search_type==2){
+								search_result("oo",atoi(name));	
+							}					
+						}
+						terminate=1;
+					}
+					else if (page==1){
+						textattr(normal);
+						clrscr();
+						footer();
+						draw_header();
+						terminate=1;
+					}
+					break;
+
+				case NULL:
+					stop=getch();
+					switch(stop){
+						case esc:
+							terminate=1;
+							break;
+
+						case home:
+						   if(page==0){
+								pos=0;
+								gotoxy(35+pos,10);	
+							}
+							break;
+
+						case end:
+							if(page==0){
+								pos=end;
+								gotoxy(35+pos,10);
+							}
+							break;
+							
+						case left:
+							if(page==0){
+								pos--;
+								if(pos<=0){
+									pos=0;
+									gotoxy(35,10);
+								}
+								else{
+									gotoxy(35+pos-1,10);
+								}
+							}
+							else{
+							// draw button
+								if(page==1){
+									page=2;
+									gotoxy(35,13);
+									printf("Search");
+									
+								}
+								
+								else{
+								    page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+							
+							break;
+
+						case right:
+							if(page==0){
+								pos++;
+								if(pos>=End) {
+									pos=End;
+									gotoxy(35+pos-1,10);
+								}
+								else gotoxy(35+pos,10);
+							}
+							else{
+								// draw button
+								if(page==1){
+									gotoxy(35,13);
+									printf("Search");
+									page=2;
+								}
+								
+								else{
+									page=1;
+									gotoxy(45,13);
+									printf("Cancel");
+								}
+							}
+								break;
+
+						case del:
+						    if(page==0){
+								deleteChar(ptr,pos,End,del);
+								pos=pos-1;
+								if(pos<0) pos=0;
+								End=End-1;
+								if(End<0) End=0;
+							}								
+						    break;
+								
+						case up:
+								page=0;
+								gotoxy(35+pos,10);
+								break;
+
+					    case down:
+								page=2;
+						        gotoxy(35,13);
+								textattr(highlight);
+								printf("Search");  
+						        break;
+					}
+					break;
+				default:
+					if(page==0){
+						checkPrint=isprint(key);
+						if(search_type==1){
+							if(checkPrint && End<=15){
+								*(ptr+pos)=key;
+								if(pos!=0){
+									gotoxy(35+pos,10);
+								}
+								cprintf("%c",key);
+								gotoxy(35+pos,10);
+								pos++;
+								End++;
+							}
+							else{
+								if(pos==End){
+									End=End+1;
+									pos=pos+1;
+								}
+								terminate=1;
+								break;
+							}
+						}
+						else if(search_type==2){
+							if(checkPrint && End<=15 &&  isdigit(key)){
+								*(ptr+pos)=key;
+								if(pos!=0){
+									gotoxy(35+pos,10);
+								}
+								cprintf("%c",key);
+								gotoxy(35+pos,10);
+								pos++;
+								End++;
+							}
+							else{
+								if(pos==End){
+									End=End+1;
+									pos=pos+1;
+								}
+								terminate=1;
+								break;
+							}
+						}
+
+					}
+				}
+		if(End>15) {
+		    stop=enter;
+			//getch();
+		}
+		/* else{
+			gotoxy(1+pos-1,1) ;
+		} */
+		flushall();
+	}while(!terminate);
+
+}
+
+// not found Screen
+void NotFound(void){
+		int i,j;
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(32,12);
+		textcolor(BLACK);
+		printf("Contact is Not Found\n");
+
+		// draw button
+		gotoxy(38,14);
+		printf("Cancel");
+		textcolor(BLACK);
+
+		gotoxy(38,14);
+		getch();
+		
+		//hide screen
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textbackground(highlight);
+				cprintf("%c" , ' ');
+			}
+		}
 }
 
 //create new node
@@ -918,6 +1226,195 @@ void delete_contact(struct contact * temp)
 		}
 		}
 		while(ee!=NULL); */
+}
+
+// search processing
+void search_result(char Name[15],int Number){
+
+	struct contact * temp=head;
+	int pos=3;
+	char key;
+	int i;
+		if(Number!=0){
+			while(temp!=NULL && temp->phone!=Number){
+				temp=temp->next;
+			}
+		}
+		else{
+			while((temp!=NULL && strcmp(temp->name,Name))){
+				temp=temp->next;
+			}
+		}
+		if(temp==NULL){
+			textattr(normal);
+			clrscr();
+			footer();
+			draw_header();
+			NotFound();
+		}
+		
+		else{
+			search_result_screen(temp);
+			temp=temp->next;
+			do{
+				flushall();
+				key=getch();
+				switch(key){
+					case enter:
+					// next button
+					if(pos==3){
+						if(Number!=0){
+							while(temp!=NULL && temp->phone!=Number){
+								temp=temp->next;
+							}
+						}
+						else{
+							while((temp!=NULL && strcmp(temp->name,Name))){
+								temp=temp->next;
+							}
+						}
+
+						if(temp!=NULL){
+							search_result_screen(temp);
+							temp=temp->next;
+						}
+						else{
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							temp==NULL;
+						}
+					}
+					// break;
+					// remove button
+					else if(pos==2){
+							delete_contact(temp->prev);
+					}
+					break;
+					// edit button
+				   //	else if(pos==1){
+
+				  //	}
+				case esc:
+					textattr(normal);
+					clrscr();
+					footer();
+					draw_header();
+					temp=NULL;
+					break;
+
+				case right:
+					pos--;
+					if(pos<1) pos=3;
+					if(pos==3) gotoxy(50,16);
+					else if (pos==2) gotoxy(38,16);
+					else if (pos==1) gotoxy(28,16);
+					break;
+
+				case left:
+					pos++;
+					if(pos>3) pos=1;
+					if(pos==3) gotoxy(50,16);
+					else if (pos==2) gotoxy(38,16);
+					else if (pos==1) gotoxy(28,16);
+					break;
+
+			}
+			}while(temp!=NULL);
+			flushall();
+			getch();
+			textattr(normal);
+			clrscr();
+			footer();
+			draw_header();
+			
+		}
+	}
+
+// search result screen
+void search_result_screen(struct contact * temp){
+		int i,j , pos , terminate;
+		char key;
+		for(i=19;i<65;i++){
+			for(j=7;j<17; j++){
+				gotoxy(i,j);
+				textbackground(BROWN);
+				cprintf("%c" , ' ');
+			}
+		}
+		
+		gotoxy(36,8);
+		textcolor(BLACK);
+		printf("Search Result\n");
+
+	    gotoxy(28,10);
+		printf("Name: ");
+		gotoxy(35,10);
+		printf("%s",temp->name);
+		
+		gotoxy(28,12);
+		printf("Phone: ");
+		gotoxy(35,12);
+		printf("%d",temp->phone);
+		
+		gotoxy(28,14);
+		printf("Address: ");
+		gotoxy(37,14);
+		printf("%s",temp->address);
+		
+		// draw button
+		gotoxy(28,16);
+	    printf("Edit");
+		textcolor(BLACK);
+		
+		gotoxy(38,16);
+	    printf("Remove");
+		textcolor(BLACK);
+		
+		gotoxy(50,16);
+	    printf("Next");
+		textcolor(BLACK);
+		
+		gotoxy(50,16);
+	
+}
+
+void deleteChar(char *pt,int pos,int size, int button){
+		int i;
+		printf("\n%d,%d",pos,size);
+		if(pos>0){
+		if(button==del){
+				if(pos==size){
+					*(pt+pos)='\0' ;
+					*(pt+pos+1)='\0' ;
+					gotoxy(35+pos-1,10);
+					cprintf("%c",'\0');
+				    gotoxy(35+pos-2,10);
+				}
+				else{
+				for(i=pos-1;i<size;i++) {
+					*(pt+i)=*(pt+i+1);
+					*(pt+i+1)='\0';
+					gotoxy(35+i,10);
+					cprintf("%c",*(pt+i));
+					//if(i==0) gotoxy(1,1);
+					//else gotoxy(1+i-1,1);
+					
+				}
+				}
+		}
+		else{
+			for(i=pos;i<size-1;i++) {
+				//printf("\n%d,%d",i,size-1);
+				*(pt+i)=*(pt+i+1) ;
+				gotoxy(35+i,10);
+				cprintf("%c",*(pt+i));
+				gotoxy(35+i+1,10);
+				cprintf("%c",' ');
+			}
+		}
+		}
 }
 
 //hala

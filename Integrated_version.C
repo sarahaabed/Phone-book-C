@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define esc 		27
 #define enter 		13
@@ -64,13 +65,15 @@ void search_result(char Name[10],int Number);       //heba
 void search_result_screen(struct contact * temp);   //heba
 void deleteChar(char *pt,int pos,int size, int button); //heba
 
-/*
 
-void EditRecord(void);//sarah this will call CreatLineEditor 3 times
-//char *LineEditor(int col,int row); //sarah
-void EditRecord(void); //sarah
-void add_record_window(void);
-*/
+char* LineEditor(int col,int r);                              //sarah
+void Editing (void);                                          //sarah
+void swap (struct node * t1,struct node * t2);                 //sarah
+void sort(struct node * temp1,struct node * temp2,int sort-type);    //sarah
+void displayLinked(void) ;                                    //sarah
+
+
+
 
 int main(void)
 {
@@ -578,13 +581,22 @@ void menu_view(void)   						  	//done
 				{
 
 					case 0:
-						//sort by name func
+						sort(head,head,0);
+						draw_phone_book();
+						display();
 						break;
 					case 1:
 						//sort by phone func
+						
+						sortByName(head,head,1);
+						draw_phone_book();
+						display();
 						break;
 					case 2:
 						//sort by address func
+						sortByName(head,head,2);
+						draw_phone_book();
+						display();
 						break;
 				}
 				break;
@@ -1536,4 +1548,205 @@ char* line_editor(int col,int row, char key, char* arr)  //almost done
 		}
 	}while(!stop);
 	return arr;
+}
+
+
+void Editing (void)
+{
+char EditFeilds[3][16]={"Name","phone","address" };
+int j,step1=0,step2=0;
+char * result;
+int i;
+textattr(normal);
+		clrscr();
+		window(15,5,65,15);
+		textattr(highlight2);
+		for(i=1;i<11;i++)
+			cprintf("                                                                   ");
+	      for(i=0;i<3;i++)
+	      {
+		gotoxy(12,5+step1);
+		puts(EditFeilds[i]);
+		gotoxy(20,5+step1);
+		textbackground(BLUE);
+		for(j=0;j<22;j++)
+		cprintf(" ");
+		step1+=2;
+		}
+
+		gotoxy(30,10);
+		textattr(highlight) ;
+		cprintf("\n OK ") ;
+
+		for(i=0;i<3;i++)
+		{
+		result=(char *)LineEditor(20,5+step2);
+		if(result[0]=='\0')
+			break;
+	       //	puts(result);          //hena retreive text de eli hanwadeha
+				       //lel linked list
+		step2+=2;
+	       }
+
+}
+
+char* LineEditor(int col,int r)
+{
+int startcol=col,currentcol=col,endcol=col,term=0,index=0,i;
+char key;
+int row=r;
+char *startptr,*currentptr,*endptr;
+char text[50],ch;
+currentptr=text;
+startptr=text;
+endptr=text;
+text[0]='\0';
+
+   while(!term){
+
+	 gotoxy(currentcol,row);
+
+	 key=getch();
+	 flushall();
+		if (key==NULL)
+			key=getch();
+			flushall();
+
+		switch(key){
+
+
+			case right :
+				if(currentcol<41){
+					currentcol++;
+					currentptr++;
+						  }
+			break;
+			case left:
+				if(currentcol>0 && currentcol>startcol)
+				{
+				currentcol--;
+				currentptr--;
+				}
+			break ;
+			case end:
+				currentcol=endcol;
+				currentptr=endptr;
+
+			break;
+			case home:
+				currentcol=startcol;
+				currentptr=startptr;
+
+			break ;
+
+
+				case up :
+				row-=2;
+				if(row>5)
+				row=9;
+			break;
+
+			case down :
+				row+=2;
+				if(row>9)
+				row=5;
+			break;
+
+			case enter:
+			      //	textattr(normal);
+				*endptr='\0';
+				term=1;
+			break ;
+			 case esc :
+				term=1;
+			 break;
+
+			 case tab :
+			 gotoxy(30,10);
+			 getch();
+			 break;
+
+			  default:
+				gotoxy(currentcol,15);
+				*currentptr=key;
+
+			 if(currentcol<41) {
+			 currentcol++;
+			 currentptr++;
+					 }
+			 if(endcol<currentcol)
+				{
+					endcol++;
+					endptr++;
+
+				  }
+			  textattr(hilight);
+				 cprintf("%c",key);
+
+
+
+		  }
+	 }
+   return text;
+   }
+
+   void displayLinked(void)
+{
+       struct node * temp;
+       temp=head;
+       while(temp!=NULL)
+       {
+       printf(" \n Name is :") ;
+       puts(temp->name);
+       printf("\n ID: %d ",temp->id);
+       printf("\n age : %d ",temp->age);
+       temp=temp->next;
+
+       }
+
+}
+void sort (struct node * temp1,struct node * temp2,int sort-type)
+{
+	temp1=temp1;
+	while(temp2 != NULL )
+	{
+		if(sort-type==0)
+		{
+		if(strcmpi(temp1->name,temp2->name)>0)
+			swap(temp1,temp2);
+		}
+		else if (sort-type==2)
+		{
+		if(strcmpi(temp1->address,temp2->address)>0)
+			swap(temp1,temp2);
+		}
+		else
+		{
+		if(temp1->phone > temp2->name)
+			swap(temp1,temp2);
+		}
+
+
+		temp2=temp2->next;
+	}
+
+	temp1=temp1->next;
+	temp2=temp1->next;
+	if(temp1 != NULL)
+	{
+		sort(temp1,temp2);
+	}
+}
+
+  
+void swap (struct node * t1,struct node * t2)
+{       if (t1==head)
+		head=t2;
+	t1->prev->next=t1->next;
+	t2->next->prev=t2->prev;
+	t2->next->prev=t2->prev;
+	t2->prev=t1->prev;
+	t1->next=t2->next;
+	t1->prev=t2;
+	t2->next=t1;
 }

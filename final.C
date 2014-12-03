@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define esc 		27
 #define enter 		13
@@ -28,7 +29,7 @@
 
 struct contact{
 	char name[15];
-	int phone;
+	char phone[15];
 	char address[20];
 	struct contact * prev;
 	struct contact * next;
@@ -38,39 +39,45 @@ struct contact{
 //global variable
 struct contact * head , * tail; 					// heba
 char* file_name;
+int records_num=0;
 
 //functions prototypes
-void draw_header(void);   							//all
-void header(char);        							//all
-void footer(void);       							//all
-void menu_view(void);    							//hala
-void menu_file(void);    							//taher
-void menu_search(void);     						//heba
-void open_file_window(int); 						//taher
-char* line_editor(int,int,char, char*); 			//hala
-void draw_phone_book(void);//char*);  				//hala
-void phone_book(char*);								//hala
+void draw_header(void);   							
+void header(char);        							
+void footer(void);       							
+void menu_view(void);    							
+void menu_file(void);    							
+void menu_search(void);     						
+void open_file_window(int); 						
+char* line_editor(int,int,char, char*); 			
+void draw_phone_book(void);//char*);  				
+void phone_book(char*);								
 
 void save_file(char *);
+int are_you_sure(void);
 
-int ReadFile(char* szInputfile); 					//heba
-struct contact * createNode(void); 					//heba
-void append (struct contact *ele); 					//heba
-void display(int,int);								//hala
-void delete_contact(struct contact * temp); 		//heba
-void search_by(int search_type);                    //heba
-void NotFound(void);                                //heba
-void search_result(char Name[10],int Number);       //heba
-void search_result_screen(struct contact * temp);   //heba
-void deleteChar(char *pt,int pos,int size, int button); //heba
+int ReadFile(char* szInputfile); 					
+struct contact * createNode(void); 					
+void append (struct contact *ele); 					
+void display(int,int);								
+void delete_contact(struct contact * temp); 		
+void search_by(int search_type);                   
+void NotFound(void);                               
+void search_result(char Name[10],int );       
+void search_result_screen(struct contact * );   
+void deleteChar(char *pt,int pos,int size,int col,int row ,int button);
 
+void sort (struct contact * ,struct contact * ,int );
+void swap (struct contact * ,struct contact *);
+
+//void Editing (struct contact *);
 /*
 
 void EditRecord(void);//sarah this will call CreatLineEditor 3 times
 //char *LineEditor(int col,int row); //sarah
-void EditRecord(void); //sarah
+void EditRecord(void); //sarah */
 void add_record_window(void);
-*/
+
 
 int main(void)
 {
@@ -128,6 +135,108 @@ int main(void)
 	return 0;
 }
 
+int are_you_sure(void)
+{
+    char SaveOptions[2][10]={" Ok "," Cancel "};
+	int i,j,terminate=0,pos=0, sure;
+	char SaveSelection ;
+	clrscr();
+	footer();
+	draw_header();
+	//textattr(highlight2);
+	
+	window(15,7,65,17);
+	gotoxy(1,1);
+	textattr(highlight2);
+	for (i=0; i<11; i++)
+		cprintf("                                                       ");
+
+	
+	gotoxy(20,3);
+    textcolor(WHITE);
+	cprintf("Are  You Sure ? \n");
+	gotoxy(2,8);
+	cprintf("----------------------------------------------");
+       do{
+       	for(j=0;j<2;j++)
+
+		{
+		       if(j==pos)
+				textbackground(YELLOW);
+			gotoxy(10+j*15,9);
+
+			cprintf("%s",SaveOptions[j]);
+			 textattr(highlight);
+		}
+		textattr(highlight2);
+		gotoxy(2,10);
+		cprintf("-----------------------------------------------");
+
+		flushall();
+		SaveSelection=getch();
+		switch(SaveSelection)
+		{
+			case NULL:
+				SaveSelection=getch();
+				switch(SaveSelection)
+				{
+					case left:
+					pos--;
+					if(pos<0)
+						pos=1;
+					break;
+
+					case right:
+					pos++;
+					if(pos>1)
+						pos=0;
+					break;
+
+				}
+
+			break;
+		case enter :
+			switch(pos)
+			{
+				case 0:
+					sure=0;
+					terminate=1;
+				break;
+				case 1:
+					sure=1;
+					terminate=1;
+				break;
+			}
+		break;
+			case tab:
+					pos++;
+					if(pos>1)
+						pos=0;
+			break;
+
+			case ok:
+			       //	getch()
+				 sure=1;
+				//printf("\n\n\n ok handling in progress...\n");
+				terminate=1;
+				pos=0;
+			break;
+			case cancel:
+				sure=0;
+				//printf("\n\n\n cancelling...\n");
+				pos=1;
+				terminate=1;
+			break;
+
+			case esc:
+				terminate=1;
+			break;
+		}
+
+       }while(!terminate);
+		return sure;
+}
+
 void draw_header(void)    //done
 {
 	int pos,i;
@@ -173,7 +282,7 @@ void footer(void)        //done
 void menu_file(void)      //done
 {
 	char key;
-   	int pos=0,i, stop=0, size=4;
+   	int pos=0,i, stop=0, size=4, sure=0;
    	char file_menu[4][20]={"   New    " , "   Open   " , "   Save   " , "   Exit   "};
 	flushall();
 	
@@ -265,6 +374,7 @@ void menu_file(void)      //done
 						clrscr();
 						footer();
 						draw_header();
+						head=tail=NULL;
 						open_file_window(0);
 						//clrscr();
 						//printf("ba3d open %s",file_name);
@@ -278,15 +388,47 @@ void menu_file(void)      //done
 						clrscr();
 						footer();
 						draw_header();
-						//open_file_window(0,file_name);
-						//clrscr();
-						//printf("2abl manady %s",file_name);
-						//getch();
-						save_file(file_name);
+						sure=are_you_sure();
+						if (sure==0)
+						{
+							window(1,1,80,24);
+							clrscr();
+							textbackground(BLACK);
+							clrscr();
+							footer();
+							draw_header();
+							save_file(file_name);
+						}
+						else
+						{
+							window(1,1,80,24);
+							textbackground(BLACK);
+							clrscr();
+							footer();
+							draw_header();
+						}
 						stop=1;
 						break;
 					case 3:
-						exit(0);
+						textbackground(BLACK);
+						clrscr();
+						footer();
+						draw_header();
+						sure=are_you_sure();
+						if (sure == 0)
+						{	
+							exit(0);
+						}
+						else
+						{
+							window(1,1,80,24);
+							textbackground(BLACK);
+							clrscr();
+							footer();
+							draw_header();
+						}
+						stop=1;
+						break;
 				}
 				break;		
 			case esc:
@@ -317,9 +459,10 @@ void save_file(char * file_name)		//done
    }
 	else
 	{
+		fflush(pfile_out);
 		while(temp != NULL)
 		{
-			fprintf(pfile_out,"%s,%d,%s", temp->name , temp->phone,temp->address);
+			fprintf(pfile_out,"%s,%s,%s", temp->name , temp->phone,temp->address);
 			temp=temp->next;
 		}
 		fclose(pfile_out);
@@ -575,7 +718,7 @@ void menu_view(void)   						  	//done
 				footer();
 				draw_header();
 			//	draw_phone_book();
-				getch();
+				//getch();
 				stop=1;
 
 				//read from file func
@@ -584,13 +727,28 @@ void menu_view(void)   						  	//done
 				{
 
 					case 0:
+						sort(head,head,0);
+						draw_header();
+						draw_phone_book();
+						display(records_num,0);
 						//sort by name func
+						stop=1;
 						break;
 					case 1:
+						sort(head,head,1);
+						draw_header();
+						draw_phone_book();
+						display(records_num,0);
 						//sort by phone func
+						stop=1;
 						break;
 					case 2:
+						sort(head,head,2);
+						draw_header();
+						draw_phone_book();
+						display(records_num,0);
 						//sort by address func
+						stop=1;
 						break;
 				}
 				break;
@@ -669,6 +827,12 @@ void phone_book(char* file_name)				//done
 					//Operations on records
 					case insert:
 						// add record func
+						add_record_window();
+						window(1,1,80,24);
+						textattr(normal);
+						clrscr();
+						footer();
+						draw_header();
 						break;
 					case del:
 						//sure?? func
@@ -691,6 +855,13 @@ void phone_book(char* file_name)				//done
 						break;
 					case f2:
 						//edit func			/sarah
+						// update button
+				
+							//if(curr_contact==NULL) Editing(tail);
+							 //Editing(curr_contact);
+						
+					
+					
 						break;
 				}
 				break;
@@ -710,6 +881,154 @@ void phone_book(char* file_name)				//done
 	}while(!stop);
 	//return file_name;
 }
+void add_record_window(void)
+{
+	int size=2,stop=0;
+   	int pos=-3;
+   	int i = 0, field=0;
+   	char key;
+	struct contact* con;
+	
+	
+	char* name;
+	char* address;
+	char* phone;
+   	char window_buttons[2][15]={"   OK    ","  CANCEL  "};         
+	
+	textattr(normal);
+	clrscr();
+	footer();         
+	draw_header();
+	
+	flushall();
+	window(15,7,65,17);
+	gotoxy(1,1);
+	textattr(highlight2);
+	for (i=0; i<11; i++)
+		cprintf("                                                       ");
+	
+	gotoxy(20,3);
+    textcolor(WHITE);
+  	cprintf("Add New record");
+
+    gotoxy(3,6);
+    cprintf("Name: ");
+	gotoxy(3,7);
+    cprintf("Phone: ");
+	gotoxy(3,8);
+    cprintf("Address: ");
+	
+	gotoxy(2,9);
+	cprintf("----------------------------------------------");
+	
+	do{
+		//window(1,20,4,30);
+		gotoxy(10,10);
+		textattr(highlight);
+		for(i=0;i<size;i++)
+		{
+			if(i==pos)
+				textbackground(YELLOW);
+			gotoxy(10+i*15,10);
+			cprintf("%s",window_buttons[i]);
+			textattr(highlight);
+		}
+		textattr(highlight2);
+		gotoxy(2,11);
+		cprintf("-----------------------------------------------");
+		
+		
+		//new_file_name=line_editor(15,6);
+		gotoxy(15,6);
+		flushall();
+		key=getch();
+		switch (key)
+		{
+			case NULL:
+				key=getch();
+				switch (key)
+				{
+					case right:
+						pos++;
+						if (pos >size-1)
+							pos=0;
+						break;
+					case left:
+						pos--;
+						if (pos < 0)
+							pos=size-1;
+						break;
+					case down:
+						pos++;
+						if (pos > -1)
+							pos=-1;
+						break;
+					case up:
+						pos--;
+						if (pos <-3)
+							pos=-3;
+						break;
+				}
+				break;
+			case tab:
+				pos++;
+				if (pos > size-1)
+					pos=-3;
+				break;
+
+			case enter:
+				switch(pos)
+				{
+					case 0 :         //ok
+						strcpy( con->name, name );
+					//clrscr();
+					//printf("fel con	%s",con->name);
+					//getch();
+						strcpy( con->phone, phone );
+						strcpy( con->address, address );
+						append(con);
+						stop=1;
+						break;
+					case 1 :     			//cancel
+						window(1,1,80,24);
+						textattr(normal);
+						clrscr();
+						footer();
+						draw_header();
+						stop=1;
+						break;
+				}
+				break;		
+			case esc:
+				window(1,1,80,24);
+				textattr(normal);
+				clrscr();
+				footer();
+				draw_header();
+				stop=1;
+				break;
+			default:
+				if (isprint(key))
+				{
+					if (pos==-3)
+					{gotoxy(15,6);
+					name=line_editor(15,6,key,name);
+					}
+					else if (pos==-2)
+					{gotoxy(15,7);
+					phone=line_editor(15,7,key,phone);
+					gotoxy(15,8);
+					}
+					else if (pos==-1)
+					{gotoxy(15,8);
+					address=line_editor(15,8,key,address);
+					}
+					
+				}
+		}
+	}while(!stop);
+}
+
 //Heba
 
 void menu_search(void) {   						//done
@@ -839,11 +1158,448 @@ void menu_search(void) {   						//done
 	
 }
 
+// not found Screen
+void NotFound(void){							//done
+		int i,j;
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textattr(highlight2);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(32,12);
+		textcolor(BLACK);
+		printf("Contact is Not Found\n");
+
+		// draw button
+		gotoxy(38,14);
+		printf("Cancel");
+		textcolor(BLACK);
+
+		gotoxy(38,14);
+		getch();
+		
+		//hide screen
+		for(i=23;i<60;i++){
+			for(j = 9;j<16; j++){
+				gotoxy(i,j);
+				textbackground(highlight);
+				cprintf("%c" , ' ');
+			}
+		}
+}
+
+//create new node
+struct contact * createNode(void)				//done
+{
+   return (struct contact *)malloc(sizeof(struct contact));
+}
+ 
+// add struct 
+void append (struct contact *ele)					//done
+{
+   if(head==NULL){
+       head=tail=ele;
+       ele->prev=NULL;
+       ele->next=NULL;
+   }
+   else{
+       ele->prev=tail;
+       tail->next=ele;
+       tail=ele;
+       ele->next=NULL;
+   }
+   records_num++;
+}                  
+ 
+// read from file
+int ReadFile(char* szInputfile)						//done
+{
+ 
+   	FILE *pfile_input;
+   	char szBuffer[100];
+	char * pTemp;
+	
+	//records_num=0;
+   	
+ 
+   /*************************************...
+   open inputfile for reading
+   **************************************... */
+ 
+   if ((pfile_input = fopen( szInputfile, "r" )) == NULL )
+   {
+       printf("Error, cannot open %s for reading\n", szInputfile);
+       exit(1);
+   }
+ 
+   /*************************************...
+   Read the data from the inputfile
+   **************************************... */
+ 
+   while( ( fgets( szBuffer, sizeof(szBuffer), pfile_input )) != NULL )
+   {
+ 
+       struct contact * record= createNode();
+       //append();
+       char num [15];
+       pTemp = strtok( szBuffer, "," );
+       strcpy( record->name, pTemp ); 
+ 
+       pTemp = strtok( NULL, "," ); 
+       //strcpy( num, pTemp );
+	   strcpy( record->phone, pTemp ); 
+       
+       pTemp = strtok( NULL, "," );
+       strcpy( record->address, pTemp ); 
+       
+       append(record);
+   }  
+   
+	fclose(pfile_input);
+   return records_num;
+}
+
+void display(int records_num, int pos)				//done
+{
+	struct contact *temp;
+    int x=4,y=4, i=0;
+    temp=head;
+    //records_num=25;
+    while(temp!=NULL && i<records_num)
+	{
+		if (i==pos)
+			textattr(highlight2);
+		gotoxy(x,y);
+       	cprintf("%s",temp->name);   
+		gotoxy(x+25,y);
+       	cprintf("%s",temp->phone);          
+	   	gotoxy(x+50,y);
+       	cprintf("%s",temp->address); 
+       	textattr(normal);
+			
+		y++;
+		i++;
+        temp=temp->next; 
+    } 
+}
+
+void delete_contact(struct contact * temp)			//done
+{
+		//struct contact *ee;
+		if (temp==head && head==tail){
+			head=tail=NULL;
+			free(temp);
+		}
+		else if (temp==head && head!=tail){
+			head=head->next;
+			head->prev=NULL;
+			free(temp);
+		}
+		else if (temp==tail && head!=tail){
+			tail=tail->prev;
+			tail->next=NULL;
+			free(temp);
+		}
+		else {
+			temp->prev->next=temp->next;
+			temp->next->prev=temp->prev;
+			free(temp);
+		}
+		tail->next=NULL;
+		records_num--;
+
+		/* ee=head;
+		do{
+		printf("\n%s\t\t%d\t\t%s\n",ee->name,ee->phone,ee->address);
+		if(ee->next!=NULL){
+			ee=ee->next;
+		}
+		else{
+			ee=NULL;
+		}
+		}
+		while(ee!=NULL); */
+}
+
+// search result screen
+void search_result_screen(struct contact * temp){		//done
+		int i,j , pos , terminate;
+		char key;
+		for(i=19;i<65;i++){
+			for(j=7;j<20; j++){
+				gotoxy(i,j);
+				textattr(highlight2);
+				cprintf("%c" , ' ');
+			}
+		}
+		gotoxy(36,8);
+		textcolor(WHITE);
+		cprintf("Search Result\n");
+
+	    gotoxy(20,10);
+		cprintf("Name: ");
+		gotoxy(35,10);
+		cprintf("%s",temp->name);
+		
+		gotoxy(20,12);
+		cprintf("Phone: ");
+		gotoxy(35,12);
+		cprintf("%s",temp->phone);
+		
+		gotoxy(20,14);
+		cprintf("Address: ");
+		gotoxy(37,14);
+		cprintf("%s",temp->address);
+		
+		textcolor(WHITE);
+		gotoxy(20,16);
+		cprintf("------------------------------------------");
+		
+		// draw button
+		textcolor(BLACK);
+		gotoxy(28,17);
+	    cprintf("Edit");
+	
+		gotoxy(38,17);
+	    cprintf("Remove");
+		
+		
+		gotoxy(50,17);
+	    cprintf("Next");
+		textcolor(WHITE);
+		
+		gotoxy(20,18);
+		cprintf("-----------------------------------------");
+		gotoxy(50,17);
+		textattr(normal);
+}
+
+
+//hala
+
+char* line_editor(int col,int row, char key, char* arr)  //almost done
+{
+	//char arr[21];//, key;
+	char *p_current=arr, *p_last=arr, *p_start=arr;
+	int strt_column=col, cur_column=col, end_column=col,counter=0,stop=0;
+	int max_chars_num=20;
+	//clrscr();
+
+	gotoxy(strt_column,row);
+	do
+	{	//flushall();
+		//key= getch();
+		switch (key)
+		{
+			case NULL:
+				key=getch();
+				switch (key)
+				{
+					case end:
+						p_current=p_last;
+						cur_column=end_column;
+						gotoxy(cur_column,row);
+						break;
+					case home:
+						p_current=p_start;
+						cur_column=strt_column;
+						gotoxy(cur_column,row);
+						break;
+					case right:
+						p_current++;
+						if (p_current > p_last)
+						{
+							p_current=p_last;
+							cur_column=end_column;
+						}
+						else
+							cur_column++;
+
+						gotoxy(cur_column,row);
+						break;
+					case left:
+						p_current--;
+						if(p_current < p_start)
+						{
+							p_current = p_start;
+							cur_column=strt_column;
+						}
+						else
+							cur_column--;
+						gotoxy(cur_column,row);
+						break;
+					/*case up:
+					case down:
+						*p_last='\0';
+						//return arr;
+						stop=1;
+						break;*/
+				}
+				flushall();
+				key=getch();
+				break;
+			case tab:
+			case esc:
+			case enter:			
+				*p_last='\0';
+				 //return arr;
+				 stop=1;
+				 break;
+			default:
+				if (counter == max_chars_num && cur_column>=end_column)
+					 {p_current=p_last;}
+				else
+				{
+					if(isprint(key))
+					{
+						gotoxy(cur_column,row);
+						cprintf("%c",key);
+						*p_current = key;
+						cur_column++;
+						p_current++;
+						if(p_current > p_last && end_column<=strt_column+max_chars_num)
+						{       end_column++;
+							p_last++;
+							counter++;
+						}
+					}
+				}
+				flushall();
+				key=getch();
+				break;
+		}
+	}while(!stop);
+	return arr;
+}
+
+
+void sort (struct contact * temp1,struct contact * temp2,int sort_type)
+{
+	temp1=temp1;
+	while(temp2 != NULL )
+	{
+		if(sort_type==0)
+		{
+		if(strcmpi(temp1->name,temp2->name)>0)
+			swap(temp1,temp2);
+		}
+		else if (sort_type==2)
+		{
+		if(strcmpi(temp1->address,temp2->address)>0)
+			swap(temp1,temp2);
+		}
+		else
+		{
+		if(strcmpi(temp1->phone,temp2->phone)>0)
+			swap(temp1,temp2);
+		}
+		temp2=temp2->next;
+	}
+	temp2=temp1->next;
+	temp1=temp1->next;
+	if(temp1 != NULL)
+	{
+		sort(temp1,temp2,sort_type);
+	}
+}
+/*  
+void swap (struct contact * t1,struct contact * t2)
+{   
+	struct contact* temp;//,*temp2;;
+	temp=t2;
+	//temp2=t2;
+	printf("%s   ",t1->name);
+	printf("%s   ",t2->name);
+	//printf("%s   ",temp->name);
+	getch();
+	if (t1==head && t2!= tail)
+	{	
+	t2->next->prev=NULL;//t2->prev;
+	t2->prev->next=t1;//t1->prev;
+	
+	t2->next=t1->next;
+	t2->prev=NULL;
+	head = t2;
+	}
+	else if(t1!=head && t2== tail)
+	{
+	//t2->next->prev=t1;//t2->prev;
+	t2->prev->next=t1;//t1->prev;
+	
+	//temp->next=t2->next;
+	//temp->prev=t2->prev;
+	
+	t2->next=t1->next;
+	t2->prev=t1->prev;
+	tail=t1;
+	}
+	else if (t1==head && t2== tail)
+	{
+	//t1->prev->next=t2;//t1->next;
+	t1->next->prev=t2;	
+	
+	//t2->next->prev=t1;//t2->prev;
+	t2->prev->next=t1;//t1->prev;
+	
+	//t1->next=NULL;
+	//t1->prev=t2->prev;
+	
+	t2->next=t1->next;
+	t2->prev=NULL;
+	head=t2;
+	tail=t1;
+	}
+	else
+	{
+	//temp->prev->next=t2;//t1->next;
+	//temp->next->prev=t2;	
+	
+	t2->next->prev=t1;//t2->prev;
+	t2->prev->next=t1;//t1->prev;
+	
+	//temp->next=t2->next;
+	//temp->prev=t2->prev;
+	
+	t2->next=t1->next;
+	t2->prev=t1->prev;
+	}
+	t2=t1;
+	t1=temp;
+	//
+//	t2->prev=temp->prev;
+//	t2->next=temp->next;
+	
+	
+	printf("\n%s    ",t1->name);
+	printf("%s   ",t2->name);
+	//printf("%s   ",temp->name);
+	getch();
+	printf("\n");
+	display(records_num,0);
+	
+	
+	
+} */
+
+void swap (struct contact * t1,struct contact * t2)
+{       if (t1==head)
+		head=t2;
+	t1->prev->next=t1->next;
+	t2->next->prev=t2->prev;
+	t2->next->prev=t2->prev;
+	t2->prev=t1->prev;
+	t1->next=t2->next;
+	t1->prev=t2;
+	t2->next=t1;
+}
+
 void search_by(int search_type){				//done
 		
 		int i,j,checkPrint,stop;
 		int pos=0,terminate=0,End=0,page=0;
-		char name[15],key , search_word;
+		char name[21],key , search_word;
 		char * ptr;
 		ptr=name;
 
@@ -855,7 +1611,7 @@ void search_by(int search_type){				//done
 			}
 		}
 		gotoxy(35,8);
-		textcolor(WHITE);
+		textcolor(BLACK);
 		
 		if(search_type==1){
 			printf("Search By Name\n");
@@ -871,7 +1627,7 @@ void search_by(int search_type){				//done
 		// draw button
 		gotoxy(35,13);
 	    printf("Search");
-		textcolor(WHITE);
+		textcolor(BLACK);
 		
 		gotoxy(45,13);
 	    printf("Cancel");
@@ -884,7 +1640,6 @@ void search_by(int search_type){				//done
 			cprintf("%c" , ' ');
 			gotoxy(i+1,10);
 		}
-		 
 			
 		gotoxy(35,10);
 		//***************** Enter Search Word (Phone , Name)*************************//
@@ -898,7 +1653,7 @@ void search_by(int search_type){				//done
 						pos--;
 						if(pos<0) pos=0;
 						else{
-							deleteChar(ptr,pos-1,End,backspace);
+							deleteChar(ptr,pos-1,End,35,10,backspace);
 							End=End-1;
 						}
 					}
@@ -933,7 +1688,7 @@ void search_by(int search_type){				//done
 							}
 							// search by phone
 							else if(search_type==2){
-								search_result("oo",atoi(name));	
+								search_result(name,1);	
 							}					
 						}
 						terminate=1;
@@ -1024,7 +1779,7 @@ void search_by(int search_type){				//done
 
 						case del:
 						    if(page==0){
-								deleteChar(ptr,pos,End,del);
+								deleteChar(ptr,pos,End,35,10,del);
 								pos=pos-1;
 								if(pos<0) pos=0;
 								End=End-1;
@@ -1049,7 +1804,7 @@ void search_by(int search_type){				//done
 					if(page==0){
 						checkPrint=isprint(key);
 						if(search_type==1){
-							if(checkPrint && End<=15){
+							if(checkPrint && End<=21){
 								*(ptr+pos)=key;
 								if(pos!=0){
 									gotoxy(35+pos,10);
@@ -1069,7 +1824,7 @@ void search_by(int search_type){				//done
 							}
 						}
 						else if(search_type==2){
-							if(checkPrint && End<=15 &&  isdigit(key)){
+							if(checkPrint && End<=21 &&  isdigit(key)){
 								*(ptr+pos)=key;
 								if(pos!=0){
 									gotoxy(35+pos,10);
@@ -1091,189 +1846,22 @@ void search_by(int search_type){				//done
 
 					}
 				}
-		if(End>15) {
-		    stop=enter;
-			//getch();
-		}
-		/* else{
-			gotoxy(1+pos-1,1) ;
-		} */
 		flushall();
 	}while(!terminate);
 
 }
 
-// not found Screen
-void NotFound(void){							//done
-		int i,j;
-		for(i=23;i<60;i++){
-			for(j = 9;j<16; j++){
-				gotoxy(i,j);
-				textattr(highlight2);
-				cprintf("%c" , ' ');
-			}
-		}
-		gotoxy(32,12);
-		textcolor(BLACK);
-		printf("Contact is Not Found\n");
-
-		// draw button
-		gotoxy(38,14);
-		printf("Cancel");
-		textcolor(BLACK);
-
-		gotoxy(38,14);
-		getch();
-		
-		//hide screen
-		for(i=23;i<60;i++){
-			for(j = 9;j<16; j++){
-				gotoxy(i,j);
-				textbackground(highlight);
-				cprintf("%c" , ' ');
-			}
-		}
-}
-
-//create new node
-struct contact * createNode(void)				//done
-{
-   return (struct contact *)malloc(sizeof(struct contact));
-}
- 
-// add struct 
-void append (struct contact *ele)					//done
-{
-   if(head==NULL){
-       head=tail=ele;
-       ele->prev=NULL;
-       ele->next=NULL;
-   }
-   else{
-       ele->prev=tail;
-       tail->next=ele;
-       tail=ele;
-       ele->next=NULL;
-   }
-}                  
- 
-// read from file
-int ReadFile(char* szInputfile)						//done
-{
- 
-   	FILE *pfile_input;
-   	char szBuffer[100];
-	int  records_num=0;
-   	char * pTemp;
- 
-   /*************************************...
-   open inputfile for reading
-   **************************************... */
- 
-   if ((pfile_input = fopen( szInputfile, "r" )) == NULL )
-   {
-       printf("Error, cannot open %s for reading\n", szInputfile);
-       exit(1);
-   }
- 
-   /*************************************...
-   Read the data from the inputfile
-   **************************************... */
- 
-   while( ( fgets( szBuffer, sizeof(szBuffer), pfile_input )) != NULL )
-   {
- 
-       struct contact * record= createNode();
-       //append();
-       char num [15];
-       pTemp = strtok( szBuffer, "," );
-       strcpy( record->name, pTemp ); 
- 
-       pTemp = strtok( NULL, "," ); 
-       strcpy( num, pTemp );
-       record->phone=atoi(num);
-       
-       pTemp = strtok( NULL, "," );
-       strcpy( record->address, pTemp ); 
-       
-       append(record);
-       records_num++;
-   }  
-   
-	fclose(pfile_input);
-   return records_num;
-}
-
-void display(int records_num, int pos)				//done
-{
-	struct contact *temp;
-    int x=4,y=4, i=0;
-    temp=head;
-    
-    while(temp!=NULL && i<records_num)
-	{
-		if (i==pos)
-			textattr(highlight2);
-		gotoxy(x,y);
-       	cprintf("%s",temp->name);   
-		gotoxy(x+25,y);
-       	cprintf("%d",temp->phone);          
-	   	gotoxy(x+50,y);
-       	cprintf("%s",temp->address); 
-       	textattr(normal);
-			
-		y++;
-		i++;
-        temp=temp->next; 
-    } 
-}
-
-void delete_contact(struct contact * temp)			//done
-{
-		//struct contact *ee;
-		if (temp==head && head==tail){
-			head=tail=NULL;
-			free(temp);
-		}
-		else if (temp==head && head!=tail){
-			head=head->next;
-			head->prev=NULL;
-			free(temp);
-		}
-		else if (temp==tail && head!=tail){
-			tail=tail->prev;
-			tail->next=NULL;
-			free(temp);
-		}
-		else {
-			temp->prev->next=temp->next;
-			temp->next->prev=temp->prev;
-			free(temp);
-		}
-		tail->next=NULL;
-
-		/* ee=head;
-		do{
-		printf("\n%s\t\t%d\t\t%s\n",ee->name,ee->phone,ee->address);
-		if(ee->next!=NULL){
-			ee=ee->next;
-		}
-		else{
-			ee=NULL;
-		}
-		}
-		while(ee!=NULL); */
-}
 
 // search processing
-void search_result(char Name[15],int Number){		//done
+void search_result(char Name[21],int Number){		//done
 
 	struct contact * temp=head;
-	int pos=3, stop=0;
+	struct contact * LastNode ;
+	int pos=3 , stopLoop=0;
 	char key;
 	int i;
 		if(Number!=0){
-			while(temp!=NULL && temp->phone!=Number){
+			while(temp!=NULL && strcmp(temp->phone,Name)){
 				temp=temp->next;
 			}
 		}
@@ -1289,20 +1877,20 @@ void search_result(char Name[15],int Number){		//done
 			draw_header();
 			NotFound();
 		}
+		
 		else{
 			search_result_screen(temp);
-			//temp=temp->next;
+			temp=temp->next;
 			do{
 				flushall();
 				key=getch();
 				switch(key){
 					case enter:
-					
 					// next button
 					if(pos==3){
-					temp=temp->next;
+						//temp=temp->next;
 						if(Number!=0){
-							while(temp!=NULL && temp->phone!=Number){
+							while(temp!=NULL && strcmp(temp->phone,Name)){
 								temp=temp->next;
 							}
 						}
@@ -1321,244 +1909,105 @@ void search_result(char Name[15],int Number){		//done
 							clrscr();
 							footer();
 							draw_header();
-							temp=NULL;
-							stop=1;
-							break;
+							stopLoop=1;
 						}
 					}
-					// break;
 					// remove button
 					else if(pos==2){
-						if(temp==tail)
-						{
-								delete_contact(temp);
-								temp=NULL;
-								stop=1;
-						}
-						else
-						{
-							delete_contact(temp);
-							//pos=3;
-							//temp=temp->next;
-							stop=1;
-						}	
-							//stop=1;
-							break;
-						}
-						
+							if(temp==NULL) delete_contact(tail);
+							else delete_contact(temp->prev);
+							stopLoop=1;
+					}
+					
+					// update button
+					else if(pos==1){
+							//if(temp==NULL) Editing(tail);
+							//else Editing(temp->prev);
+							//stopLoop=1;
+					}
+					//stopLoop=1;
 					break;
-					// edit button
-				   //	else if(pos==1){
-
-				  //	}
 				case esc:
 					textattr(normal);
 					clrscr();
 					footer();
 					draw_header();
-					temp=NULL;
-					stop=1;
+					stopLoop=1;
 					break;
 
 				case right:
 					pos++;
+					//textattr(highlight);
 					if(pos>3) pos=1;
-					if(pos==3) gotoxy(50,16);
-					else if (pos==2) gotoxy(38,16);
-					else if (pos==1) gotoxy(28,16);
+					if(pos==3) gotoxy(50,17);
+					else if (pos==2) gotoxy(38,17);
+					else if (pos==1) gotoxy(28,17);
+					//cprintf("-------");
+					stopLoop=0;
 					break;
 
 				case left:
 					pos--;
+					//textattr(highlight);
 					if(pos<1) pos=3;
-					if(pos==3) gotoxy(50,16);
-					else if (pos==2) gotoxy(38,16);
-					else if (pos==1) gotoxy(28,16);
+					if(pos==3) gotoxy(50,17);
+					else if (pos==2) gotoxy(38,17);
+					else if (pos==1) gotoxy(28,17);
+					//cprintf("-------");
+					stopLoop=0;
 					break;
 
 			}
-			}while(!stop );//|| temp!=NULL);
-			//flushall();
-			//getch();
+			}while(stopLoop==0);
+			flushall();
+			getch();
 			textattr(normal);
 			clrscr();
 			footer();
 			draw_header();
+			
 		}
 	}
 
-// search result screen
-void search_result_screen(struct contact * temp){		//done
-		int i,j , pos , terminate;
-		char key;
-		for(i=19;i<65;i++){
-			for(j=7;j<17; j++){
-				gotoxy(i,j);
-				textattr(highlight2);
-				cprintf("%c" , ' ');
-			}
-		}
-		gotoxy(36,8);
-		textcolor(BLACK);
-		cprintf("Search Result\n");
-
-	    gotoxy(28,10);
-		cprintf("Name: ");
-		gotoxy(35,10);
-		cprintf("%s",temp->name);
-		
-		gotoxy(28,12);
-		cprintf("Phone: ");
-		gotoxy(35,12);
-		cprintf("%d",temp->phone);
-		
-		gotoxy(28,14);
-		cprintf("Address: ");
-		gotoxy(37,14);
-		cprintf("%s",temp->address);
-		
-		// draw button
-		gotoxy(28,16);
-	    cprintf("Edit");
-		textcolor(BLACK);
-		
-		gotoxy(38,16);
-	    cprintf("Remove");
-		textcolor(BLACK);
-		
-		gotoxy(50,16);
-	    cprintf("Next");
-		textcolor(BLACK);
-		
-		gotoxy(50,16);
-		textattr(normal);
-}
-
-void deleteChar(char *pt,int pos,int size, int button){			//done
+	
+// line editor	
+void deleteChar(char *pt,int pos,int size,int col,int row ,int button){			//done
 		int i;
-		printf("\n%d,%d",pos,size);
+		//printf("\n%d,%d",pos,size);
+		//printf("\n\n%d,%d,%d",col,pos,row);
 		if(pos>0){
 		if(button==del){
 				if(pos==size){
 					*(pt+pos)='\0' ;
 					*(pt+pos+1)='\0' ;
-					gotoxy(35+pos-1,10);
+					gotoxy(col+pos-1,row);
 					cprintf("%c",'\0');
-				    gotoxy(35+pos-2,10);
+				    gotoxy(col+pos-2,row);
+					if(pos-1<=0)  gotoxy(col-1,row);
 				}
 				else{
-				for(i=pos-1;i<size;i++) {
+				for(i=pos-1;i<=size;i++) {
 					*(pt+i)=*(pt+i+1);
 					*(pt+i+1)='\0';
-					gotoxy(35+i,10);
+					gotoxy(col+i,row);
 					cprintf("%c",*(pt+i));
-					//if(i==0) gotoxy(1,1);
-					//else gotoxy(1+i-1,1);
-					
+					gotoxy(col+i+1,row);
+					cprintf("%c",' ');
+					if(i==0) gotoxy(col+pos,row);
+					gotoxy(col+pos-1,row);
 				}
 				}
 		}
 		else{
-			for(i=pos;i<size-1;i++) {
-				//printf("\n%d,%d",i,size-1);
+			for(i=pos;i<=size-1;i++) {
+				//printf("\n\n\n\n%d,%d",i,size-1);
 				*(pt+i)=*(pt+i+1) ;
-				gotoxy(35+i,10);
+				gotoxy(col+i,row);
 				cprintf("%c",*(pt+i));
-				gotoxy(35+i+1,10);
+				gotoxy(col+i+1,row);
 				cprintf("%c",' ');
+				gotoxy(col+i-1,row);
 			}
 		}
 		}
-}
-
-//hala
-
-char* line_editor(int col,int row, char key, char* arr)  //almost done
-{
-	//char arr[21];//, key;
-	char *p_current=arr, *p_last=arr, *p_start=arr;
-	int strt_column=col, cur_column=col, end_column=col,counter=0,stop=0;
-	int max_chars_num=20;
-	//clrscr();
-
-	gotoxy(strt_column,10);
-	do
-	{	//flushall();
-		//key= getch();
-		switch (key)
-		{
-			case NULL:
-				key=getch();
-				switch (key)
-				{
-					case end:
-						p_current=p_last;
-						cur_column=end_column;
-						gotoxy(cur_column,row);
-						break;
-					case home:
-						p_current=p_start;
-						cur_column=strt_column;
-						gotoxy(cur_column,row);
-						break;
-					case right:
-						p_current++;
-						if (p_current > p_last)
-						{
-							p_current=p_last;
-							cur_column=end_column;
-						}
-						else
-							cur_column++;
-
-						gotoxy(cur_column,row);
-						break;
-					case left:
-						p_current--;
-						if(p_current < p_start)
-						{
-							p_current = p_start;
-							cur_column=strt_column;
-						}
-						else
-							cur_column--;
-						gotoxy(cur_column,row);
-						break;
-				}
-				flushall();
-				key=getch();
-				break;
-			
-			case tab:
-			case esc:
-			case enter:			
-				*p_last='\0';
-				 //return arr;
-				 stop=1;
-				 break;
-			default:
-				if (counter == max_chars_num && cur_column>=end_column)
-					 {p_current=p_last;}
-				else
-				{
-					if(isprint(key))
-					{
-						gotoxy(cur_column,row);
-						cprintf("%c",key);
-						*p_current = key;
-						cur_column++;
-						p_current++;
-						if(p_current > p_last && end_column<=strt_column+max_chars_num)
-						{       end_column++;
-							p_last++;
-							counter++;
-						}
-					}
-				}
-				flushall();
-				key=getch();
-				break;
-		}
-	}while(!stop);
-	return arr;
 }

@@ -112,6 +112,13 @@ int main(void)
 			draw_header();
 			terminate=1;
 		}
+		else
+		{
+			textattr(normal);
+			clrscr();
+			footer();
+			draw_header();
+		}
 
 	} while(!terminate); 
 
@@ -166,7 +173,6 @@ void footer(void)        //done
 void menu_file(void)      //done
 {
 	char key;
-	
    	int pos=0,i, stop=0, size=4;
    	char file_menu[4][20]={"   New    " , "   Open   " , "   Save   " , "   Exit   "};
 	flushall();
@@ -658,6 +664,7 @@ void phone_book(char* file_name)				//done
 					case alt_s:
 					case alt_v:
 						header(key);
+						stop=1;
 						break;
 					//Operations on records
 					case insert:
@@ -781,7 +788,7 @@ void menu_search(void) {   						//done
 
 					case down:
 						pos++;
-						if(pos>2) pos=0;
+						if(pos>1) pos=0;
 						break;
 
 					case home:
@@ -848,7 +855,7 @@ void search_by(int search_type){				//done
 			}
 		}
 		gotoxy(35,8);
-		textcolor(BLACK);
+		textcolor(WHITE);
 		
 		if(search_type==1){
 			printf("Search By Name\n");
@@ -864,11 +871,11 @@ void search_by(int search_type){				//done
 		// draw button
 		gotoxy(35,13);
 	    printf("Search");
-		textcolor(BLACK);
+		textcolor(WHITE);
 		
 		gotoxy(45,13);
 	    printf("Cancel");
-		textcolor(BLACK);
+		textcolor(WHITE);
 	
 	
 		gotoxy(35,10);
@@ -1243,6 +1250,7 @@ void delete_contact(struct contact * temp)			//done
 			temp->next->prev=temp->prev;
 			free(temp);
 		}
+		tail->next=NULL;
 
 		/* ee=head;
 		do{
@@ -1261,7 +1269,7 @@ void delete_contact(struct contact * temp)			//done
 void search_result(char Name[15],int Number){		//done
 
 	struct contact * temp=head;
-	int pos=3;
+	int pos=3, stop=0;
 	char key;
 	int i;
 		if(Number!=0){
@@ -1281,17 +1289,18 @@ void search_result(char Name[15],int Number){		//done
 			draw_header();
 			NotFound();
 		}
-		
 		else{
 			search_result_screen(temp);
-			temp=temp->next;
+			//temp=temp->next;
 			do{
 				flushall();
 				key=getch();
 				switch(key){
 					case enter:
+					
 					// next button
 					if(pos==3){
+					temp=temp->next;
 						if(Number!=0){
 							while(temp!=NULL && temp->phone!=Number){
 								temp=temp->next;
@@ -1312,14 +1321,31 @@ void search_result(char Name[15],int Number){		//done
 							clrscr();
 							footer();
 							draw_header();
-							temp==NULL;
+							temp=NULL;
+							stop=1;
+							break;
 						}
 					}
 					// break;
 					// remove button
 					else if(pos==2){
-							delete_contact(temp->prev);
-					}
+						if(temp==tail)
+						{
+								delete_contact(temp);
+								temp=NULL;
+								stop=1;
+						}
+						else
+						{
+							delete_contact(temp);
+							//pos=3;
+							//temp=temp->next;
+							stop=1;
+						}	
+							//stop=1;
+							break;
+						}
+						
 					break;
 					// edit button
 				   //	else if(pos==1){
@@ -1331,17 +1357,10 @@ void search_result(char Name[15],int Number){		//done
 					footer();
 					draw_header();
 					temp=NULL;
+					stop=1;
 					break;
 
 				case right:
-					pos--;
-					if(pos<1) pos=3;
-					if(pos==3) gotoxy(50,16);
-					else if (pos==2) gotoxy(38,16);
-					else if (pos==1) gotoxy(28,16);
-					break;
-
-				case left:
 					pos++;
 					if(pos>3) pos=1;
 					if(pos==3) gotoxy(50,16);
@@ -1349,15 +1368,22 @@ void search_result(char Name[15],int Number){		//done
 					else if (pos==1) gotoxy(28,16);
 					break;
 
+				case left:
+					pos--;
+					if(pos<1) pos=3;
+					if(pos==3) gotoxy(50,16);
+					else if (pos==2) gotoxy(38,16);
+					else if (pos==1) gotoxy(28,16);
+					break;
+
 			}
-			}while(temp!=NULL);
-			flushall();
-			getch();
+			}while(!stop );//|| temp!=NULL);
+			//flushall();
+			//getch();
 			textattr(normal);
 			clrscr();
 			footer();
 			draw_header();
-			
 		}
 	}
 
@@ -1372,41 +1398,40 @@ void search_result_screen(struct contact * temp){		//done
 				cprintf("%c" , ' ');
 			}
 		}
-		
 		gotoxy(36,8);
 		textcolor(BLACK);
-		printf("Search Result\n");
+		cprintf("Search Result\n");
 
 	    gotoxy(28,10);
-		printf("Name: ");
+		cprintf("Name: ");
 		gotoxy(35,10);
-		printf("%s",temp->name);
+		cprintf("%s",temp->name);
 		
 		gotoxy(28,12);
-		printf("Phone: ");
+		cprintf("Phone: ");
 		gotoxy(35,12);
-		printf("%d",temp->phone);
+		cprintf("%d",temp->phone);
 		
 		gotoxy(28,14);
-		printf("Address: ");
+		cprintf("Address: ");
 		gotoxy(37,14);
-		printf("%s",temp->address);
+		cprintf("%s",temp->address);
 		
 		// draw button
 		gotoxy(28,16);
-	    printf("Edit");
+	    cprintf("Edit");
 		textcolor(BLACK);
 		
 		gotoxy(38,16);
-	    printf("Remove");
+	    cprintf("Remove");
 		textcolor(BLACK);
 		
 		gotoxy(50,16);
-	    printf("Next");
+	    cprintf("Next");
 		textcolor(BLACK);
 		
 		gotoxy(50,16);
-	
+		textattr(normal);
 }
 
 void deleteChar(char *pt,int pos,int size, int button){			//done

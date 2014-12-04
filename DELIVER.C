@@ -441,7 +441,6 @@ void menu_file(void)      //done
 		}
 	}while(!stop);
 }
-
 void save_file(char * file_name)		//done
 {
 	struct contact * temp;
@@ -462,9 +461,11 @@ void save_file(char * file_name)		//done
 		//fflush(pfile_out);
 		while(temp != NULL)
 		{
-			fprintf(pfile_out,"%s,%s,%s", temp->name , temp->phone,temp->address);
+		    fprintf(pfile_out,"%s,%s,%s", temp->name , temp->phone,temp->address);
 			temp=temp->next;
 		}
+		fprintf(pfile_out,"\r\n");
+			
 		fclose(pfile_out);
 	}
 }
@@ -881,6 +882,7 @@ void phone_book(char* file_name)				//done
 	}while(!stop);
 	//return file_name;
 }
+
 void add_record_window(void)
 {
 	int size=2,stop=0;
@@ -989,11 +991,7 @@ void add_record_window(void)
 						
 						//if(are_you_sure() == 0)
 							append(con);
-						clrscr();
-					printf("fel con	%s",tail->name);
-					printf("fel con	%s",tail->phone);
-					printf("fel con	%s",tail->address);
-					getch();
+							display(records_num,0);
 						stop=1;
 						break;
 					case 1 :     			//cancel

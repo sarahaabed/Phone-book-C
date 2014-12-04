@@ -459,7 +459,7 @@ void save_file(char * file_name)		//done
    }
 	else
 	{
-		fflush(pfile_out);
+		//fflush(pfile_out);
 		while(temp != NULL)
 		{
 			fprintf(pfile_out,"%s,%s,%s", temp->name , temp->phone,temp->address);
@@ -920,7 +920,7 @@ void add_record_window(void)
 	
 	gotoxy(2,9);
 	cprintf("----------------------------------------------");
-	
+
 	do{
 		//window(1,20,4,30);
 		gotoxy(10,10);
@@ -936,12 +936,11 @@ void add_record_window(void)
 		textattr(highlight2);
 		gotoxy(2,11);
 		cprintf("-----------------------------------------------");
-		
-		
-		//new_file_name=line_editor(15,6);
-		gotoxy(15,6);
+					
 		flushall();
 		key=getch();
+		//new_file_name=line_editor(15,6);
+		gotoxy(15,6);
 		switch (key)
 		{
 			case NULL:
@@ -980,13 +979,21 @@ void add_record_window(void)
 				switch(pos)
 				{
 					case 0 :         //ok
+						//name=strtok( ",",name );
+						//name=strtok( name, "," );
+						//phone=strtok( phone, "," );
+						//address=strtok( address, "," );
 						strcpy( con->name, name );
-					//clrscr();
-					//printf("fel con	%s",con->name);
-					//getch();
 						strcpy( con->phone, phone );
 						strcpy( con->address, address );
-						append(con);
+						
+						//if(are_you_sure() == 0)
+							append(con);
+						clrscr();
+					printf("fel con	%s",tail->name);
+					printf("fel con	%s",tail->phone);
+					printf("fel con	%s",tail->address);
+					getch();
 						stop=1;
 						break;
 					case 1 :     			//cancel
@@ -1023,9 +1030,11 @@ void add_record_window(void)
 					{gotoxy(15,8);
 					address=line_editor(15,8,key,address);
 					}
-					
+					pos++;
 				}
+				//stop=1;
 		}
+	
 	}while(!stop);
 }
 
@@ -1376,7 +1385,6 @@ void search_result_screen(struct contact * temp){		//done
 		textattr(normal);
 }
 
-
 //hala
 
 char* line_editor(int col,int row, char key, char* arr)  //almost done
@@ -1584,15 +1592,38 @@ void swap (struct contact * t1,struct contact * t2)
 } */
 
 void swap (struct contact * t1,struct contact * t2)
-{       if (t1==head)
+{       
+	//struct contact* temp1=createNode();
+	//struct contact* temp2=createNode();
+	//temp1=t1;
+	//temp2=t2;
+	char name[21];
+	char phone[21];
+	char address[21];
+	
+	strcpy(name,t1->name);
+	strcpy(phone,t1->phone);
+	strcpy(address,t1->address);
+	
+	strcpy(t1->name,t2->name);
+	strcpy(t1->phone,t2->phone);
+	strcpy(t1->address,t2->address);
+	
+	strcpy(t2->name,name);
+	strcpy(t2->phone,phone);
+	strcpy(t2->address,address);
+	
+	/*if (t1==head)
 		head=t2;
+	if (t2==tail)
+		tail=t2;
 	t1->prev->next=t1->next;
 	t2->next->prev=t2->prev;
 	t2->next->prev=t2->prev;
 	t2->prev=t1->prev;
 	t1->next=t2->next;
 	t1->prev=t2;
-	t2->next=t1;
+	t2->next=t1;*/
 }
 
 void search_by(int search_type){				//done

@@ -63,14 +63,14 @@ void display(int,int);
 void delete_contact(struct contact * temp); 		
 void search_by(int search_type);                   
 void NotFound(void);                               
-void search_result(char Name[10],int );       
+void search_result(char Name[21],char Number[21]);      
 void search_result_screen(struct contact * );   
 void deleteChar(char *pt,int pos,int size,int col,int row ,int button);
 
 void sort (struct contact * ,struct contact * ,int );
 void swap (struct contact * ,struct contact *);
 
-//void Editing (struct contact *);
+void Editing (struct contact *);
 /*
 
 void EditRecord(void);//sarah this will call CreatLineEditor 3 times
@@ -1385,6 +1385,239 @@ void search_result_screen(struct contact * temp){		//done
 		textattr(normal);
 }
 
+void Editing (struct contact * temp)
+{
+	char EditFeilds[3][16]={"Name","phone","address" };
+	int j,i,step1=0,checkPrint,stopLoop=0 , pos=0 , End=0;
+	char name[15] , address[21] ,phone[15],key , search_word;
+	char * ptrName , * ptrAdd ,* ptrPhone;
+	ptrName=name;
+	ptrPhone=phone;
+	ptrAdd=address;
+	
+	textattr(normal);
+	clrscr();
+	gotoxy(25,2);
+	printf("Name: %s",temp->name);
+	gotoxy(25,3);
+	printf("Phone: %s",temp->phone);
+	gotoxy(25,4);
+	printf("Address:%s",temp->address);
+	window(15,5,65,16);
+	textattr(highlight2);
+	for(i=1;i<11;i++)
+		cprintf("                                                                   ");
+	    for(i=0;i<3;i++){
+			gotoxy(12,5+step1);
+			puts(EditFeilds[i]);
+			gotoxy(20,5+step1);
+			textbackground(BLUE);
+			for(j=0;j<22;j++)	cprintf(" ");
+			step1+=2;
+		}
+
+		gotoxy(30,10);
+		textattr(highlight) ;
+		cprintf("\n OK ") ;
+		
+		step1=0;
+		gotoxy(20,5+step1);
+
+		do{
+				flushall();
+				key=getch();
+				switch(key){
+					case enter:
+						if(step1==6){
+							window(1,1,80,24);
+							textattr(normal);
+							clrscr();
+							footer();
+							draw_header();
+							if(are_you_sure()==0){
+								window(1,1,80,24);
+								strcpy(temp->name,name);
+								strcpy(temp->phone,phone);
+								strcpy(temp->address,address);
+							}
+							stopLoop=1;
+						}
+					break;
+					case esc:
+						window(1,1,80,24);
+						textattr(normal);
+						clrscr();
+						footer();
+						draw_header();
+						stopLoop=1;
+						break;
+						
+					case backspace:
+						if(step1!=6){
+							pos--;
+							if(pos<0) pos=0;
+							else{
+								if(step1==0) deleteChar(ptrName,pos,End,20,5+step1,backspace);
+								else if(step1==2) deleteChar(ptrPhone,pos,End,20,5+step1,backspace);
+								else if(step1==4) deleteChar(ptrAdd,pos,End,20,5+step1,backspace);
+								End=End-1;
+									if(End<0) {
+										End=0;
+										pos=0;
+									}
+									
+							}
+						}
+						break;
+						
+					case NULL:
+						key=getch();
+						switch(key){
+							case del:
+								if(step1!=6){
+									if(step1==0) deleteChar(ptrName,pos,End,20,5+step1,del);
+									else if(step1==2) deleteChar(ptrPhone,pos,End,20,5+step1,del);
+									else if(step1==4) deleteChar(ptrAdd,pos,End,20,5+step1,del);
+									//pos=pos-1;
+									//if(pos<0) pos=0;
+									//if(pos<End) pos=0;
+									End=End-1;
+									if(End<0) {
+										End=0;
+										pos=0;
+									}
+								}								
+								break;
+								
+							case up:
+									// set terminate character
+									if(step1==0) {
+										for(i=End-1;i<15;i++){
+											name[End]='\0';
+										}
+									}
+									else if(step1==2){
+										for(i=End-1;i<15;i++){
+											phone[End]='\0';
+										}
+									}
+									else if(step1==4){
+										for(i=End-1;i<21;i++){
+											address[End]='\0';
+										}
+									}
+									step1-=2;
+									if(step1<0) step1=6;
+									if(step1==6) gotoxy(30,10);
+									else gotoxy(20,5+step1);
+									pos=0;
+									End=0;
+									stopLoop=0;
+									break;
+
+							case down:
+									// set terminate character
+									if(step1==0) {
+										for(i=End-1;i<15;i++){
+											name[End]='\0';
+										}
+									}
+									else if(step1==2){
+										for(i=End-1;i<15;i++){
+											phone[End]='\0';
+										}
+									}
+									else if(step1==4){
+										for(i=End-1;i<21;i++){
+											address[End]='\0';
+										}
+									}
+									step1+=2;
+									if(step1>6) step1=0;
+									if(step1==6) gotoxy(30,10);
+									else gotoxy(20,5+step1);
+									pos=0;
+									End=0;
+									stopLoop=0;
+									break;
+									
+							case right:
+								if(step1!=6){
+									pos++;
+									if(pos>=End) {
+										pos=End;
+										gotoxy(20+pos-1,5+step1);
+									}
+									else gotoxy(20+pos,5+step1);
+								}
+								stopLoop=0;
+								break;
+
+							case left:
+								if(step1!=6){
+									//printf("\n\n%d",pos);
+									pos--;
+									//printf("\n\n%d",pos);
+									if(pos<=0){
+										pos=0;
+										gotoxy(20+pos,5+step1);
+									}
+									else gotoxy(20+pos-1 ,5+step1);
+								}
+								stopLoop=0;
+								break;
+						}
+						break;
+						
+					default:
+						if(step1!=6){
+							checkPrint=isprint(key);
+							if(step1==0 || step1==4){
+								if(checkPrint && End<=15 && (step1==0 || step1==4)){
+									if(step1==0)  *(ptrName+pos)=key;
+									else if (step1==4) *(ptrAdd+pos)=key;
+									
+									if(pos!=0){
+										gotoxy(20+pos,5+step1);
+									}
+									cprintf("%c",key);
+									gotoxy(20+pos,5+step1);
+									pos++;
+									End++;
+								}
+								/* else{
+									if(pos==End){
+										End=End+1;
+										pos=pos+1;
+									} */
+									stopLoop=0;
+									break;
+								}
+							else{
+									if(checkPrint && End<=15 && isdigit(key)){
+										*(ptrPhone+pos)=key;
+										if(pos!=0){
+											gotoxy(20+pos,5+step1);
+										}
+										cprintf("%c",key);
+										gotoxy(20+pos,5+step1);
+										pos++;
+										End++;
+									}
+								/* else if (checkPrint){
+									if(pos==End){
+										End=End+1;
+										pos=pos+1;
+									} */
+									stopLoop=0;
+								}
+							}
+						}
+
+		}while(stopLoop==0);
+
+}
+
 //hala
 
 char* line_editor(int col,int row, char key, char* arr)  //almost done
@@ -1630,7 +1863,7 @@ void search_by(int search_type){				//done
 		
 		int i,j,checkPrint,stop;
 		int pos=0,terminate=0,End=0,page=0;
-		char name[21],key , search_word;
+		char name[15],key , search_word;
 		char * ptr;
 		ptr=name;
 
@@ -1715,11 +1948,11 @@ void search_by(int search_type){				//done
 							}
 							// search by name
 							if(search_type==1){
-								search_result(name,0);	
+								search_result(name," ");	
 							}
 							// search by phone
 							else if(search_type==2){
-								search_result(name,1);	
+								search_result(" ",name);	
 							}					
 						}
 						terminate=1;
@@ -1835,7 +2068,7 @@ void search_by(int search_type){				//done
 					if(page==0){
 						checkPrint=isprint(key);
 						if(search_type==1){
-							if(checkPrint && End<=21){
+							if(checkPrint && End<=15){
 								*(ptr+pos)=key;
 								if(pos!=0){
 									gotoxy(35+pos,10);
@@ -1855,7 +2088,7 @@ void search_by(int search_type){				//done
 							}
 						}
 						else if(search_type==2){
-							if(checkPrint && End<=21 &&  isdigit(key)){
+							if(checkPrint && End<=15 &&  isdigit(key)){
 								*(ptr+pos)=key;
 								if(pos!=0){
 									gotoxy(35+pos,10);
@@ -1882,17 +2115,16 @@ void search_by(int search_type){				//done
 
 }
 
-
 // search processing
-void search_result(char Name[21],int Number){		//done
+void search_result(char Name[21],char Number[21]){		//done
 
 	struct contact * temp=head;
 	struct contact * LastNode ;
 	int pos=3 , stopLoop=0;
 	char key;
 	int i;
-		if(Number!=0){
-			while(temp!=NULL && strcmp(temp->phone,Name)){
+		if(strcmp(" ",Number)){
+			while(temp!=NULL && strcmp(temp->phone,Number)){
 				temp=temp->next;
 			}
 		}
@@ -1919,9 +2151,8 @@ void search_result(char Name[21],int Number){		//done
 					case enter:
 					// next button
 					if(pos==3){
-						//temp=temp->next;
-						if(Number!=0){
-							while(temp!=NULL && strcmp(temp->phone,Name)){
+						if(strcmp(" ",Number)){
+							while(temp!=NULL && strcmp(temp->phone,Number)){
 								temp=temp->next;
 							}
 						}
@@ -1952,11 +2183,11 @@ void search_result(char Name[21],int Number){		//done
 					
 					// update button
 					else if(pos==1){
-							//if(temp==NULL) Editing(tail);
-							//else Editing(temp->prev);
-							//stopLoop=1;
+							if(temp==NULL) Editing(tail);
+							else Editing(temp->prev);
+							stopLoop=1;
 					}
-					//stopLoop=1;
+					
 					break;
 				case esc:
 					textattr(normal);
@@ -1968,23 +2199,19 @@ void search_result(char Name[21],int Number){		//done
 
 				case right:
 					pos++;
-					//textattr(highlight);
 					if(pos>3) pos=1;
 					if(pos==3) gotoxy(50,17);
 					else if (pos==2) gotoxy(38,17);
 					else if (pos==1) gotoxy(28,17);
-					//cprintf("-------");
 					stopLoop=0;
 					break;
 
 				case left:
 					pos--;
-					//textattr(highlight);
 					if(pos<1) pos=3;
 					if(pos==3) gotoxy(50,17);
 					else if (pos==2) gotoxy(38,17);
 					else if (pos==1) gotoxy(28,17);
-					//cprintf("-------");
 					stopLoop=0;
 					break;
 
@@ -1999,7 +2226,6 @@ void search_result(char Name[21],int Number){		//done
 			
 		}
 	}
-
 	
 // line editor	
 void deleteChar(char *pt,int pos,int size,int col,int row ,int button){			//done
